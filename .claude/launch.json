@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "car-showcase",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["/Users/anatolepitron/Downloads/car-showcase/serve.py"],
+      "port": 8742
+    }
+  ]
+}

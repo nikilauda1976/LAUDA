@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catalogue — Garage Privé</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+
+  <style>
+    /* ─── CATALOGUE PAGE ─── */
+    body { background: #07070f; }
+
+    /* NAV override for catalogue link */
+    .nav-catalogue-link { color: var(--text-primary) !important; }
+    .nav-back {
+      display: flex; align-items: center; gap: .4rem;
+      font-size: .8125rem; font-weight: 500; color: var(--text-secondary);
+      transition: color .2s;
+    }
+    .nav-back:hover { color: var(--text-primary); }
+    .nav-back svg { opacity: .6; }
+
+    /* ─── HERO ─── */
+    .cat-hero {
+      min-height: 22vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: calc(var(--nav-h) + 2.5rem) var(--section-pad-x) 2rem;
+      text-align: center;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, #10103a 0%, #07070f 70%);
+    }
+    .cat-eyebrow {
+      font-size: .6875rem; font-weight: 700; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: .75rem;
+    }
+    .cat-title {
+      font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800;
+      letter-spacing: -.04em; line-height: 1.05;
+      background: linear-gradient(150deg, #fff 0%, rgba(210,215,255,.8) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 2rem;
+    }
+
+    /* ─── SEARCH ─── */
+    .search-wrap {
+      width: 100%; max-width: 640px; position: relative;
+    }
+    .search-wrap svg {
+      position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); pointer-events: none;
+    }
+    #search-input {
+      width: 100%; padding: .9rem 1rem .9rem 3rem;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+      border-radius: 12px; color: var(--text-primary);
+      font-family: var(--font-sans); font-size: 1rem; font-weight: 400;
+      outline: none; transition: border-color .2s, background .2s;
+    }
+    #search-input::placeholder { color: var(--text-muted); }
+    #search-input:focus {
+      border-color: rgba(255,255,255,.3);
+      background: rgba(255,255,255,.09);
+    }
+
+    /* ─── TABS ─── */
+    .cat-tabs {
+      display: flex; justify-content: center; gap: .5rem;
+      padding: 1.5rem var(--section-pad-x) 0;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .tab-btn {
+      padding: .6rem 1.75rem; border-radius: 8px 8px 0 0;
+      font-size: .875rem; font-weight: 600; letter-spacing: .02em;
+      color: var(--text-muted); background: transparent;
+      border: 1px solid transparent; border-bottom: none;
+      cursor: pointer; transition: color .2s, background .2s;
+      position: relative; bottom: -1px;
+    }
+    .tab-btn.active {
+      color: var(--text-primary);
+      background: rgba(255,255,255,.06);
+      border-color: rgba(255,255,255,.1);
+    }
+    .tab-btn:hover:not(.active) { color: var(--text-secondary); }
+
+    /* ─── SECTION LAYOUT ─── */
+    .cat-section {
+      max-width: 1360px; margin: 0 auto;
+      padding: 2rem var(--section-pad-x) 5rem;
+    }
+    .cat-section.hidden { display: none; }
+
+    /* ─── FILTER CHIPS ─── */
+    .filter-row {
+      display: flex; flex-wrap: wrap; gap: .5rem;
+      margin-bottom: 2rem;
+    }
+    .chip {
+      padding: .4rem 1rem; border-radius: 100px;
+      font-size: .75rem; font-weight: 600; letter-spacing: .04em;
+      color: var(--text-muted);
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      cursor: pointer; transition: all .2s;
+    }
+    .chip.active, .chip:hover {
+      color: var(--text-primary);
+      background: rgba(255,255,255,.1);
+      border-color: rgba(255,255,255,.2);
+    }
+    .chip.active { font-weight: 700; }
+
+    /* ─── RESULT COUNT ─── */
+    .result-count {
+      font-size: .75rem; font-weight: 500;
+      color: var(--text-muted); margin-bottom: 1.25rem;
+    }
+
+    /* ════════════════════════════════
+       MODELS GRID
+       ════════════════════════════════ */
+    .models-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .model-card {
+      background: #0d0d1a;
+      padding: 1.5rem 1.75rem;
+      cursor: default;
+      transition: background .2s;
+      position: relative;
+    }
+    .model-card:hover { background: #12121f; }
+    .model-card.hidden-card { display: none; }
+
+    .model-card-top {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; gap: .5rem;
+      margin-bottom: .5rem;
+    }
+    .model-years {
+      font-size: .6875rem; font-weight: 600;
+      letter-spacing: .08em; color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .badge-yours {
+      display: inline-block;
+      font-size: .5625rem; font-weight: 800;
+      letter-spacing: .1em; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 100px;
+      background: rgba(232,98,42,.15);
+      border: 1px solid rgba(232,98,42,.4);
+      color: #E8622A; flex-shrink: 0;
+    }
+    .badge-yours.blue {
+      background: rgba(26,58,122,.2);
+      border-color: rgba(26,58,122,.5);
+      color: #6e9fd4;
+    }
+
+    .model-name {
+      font-size: 2.25rem; font-weight: 800;
+      letter-spacing: -.04em; line-height: 1;
+      color: var(--text-primary); margin-bottom: .2rem;
+    }
+    .model-gen {
+      font-size: .75rem; font-weight: 500;
+      color: var(--text-muted); margin-bottom: .75rem;
+    }
+    .model-bodies {
+      display: flex; flex-wrap: wrap; gap: .35rem;
+      margin-bottom: .9rem;
+    }
+    .body-chip {
+      font-size: .625rem; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 3px 8px; border-radius: 5px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      color: var(--text-secondary);
+    }
+    .model-variants {
+      font-size: .75rem; font-weight: 400;
+      color: var(--text-muted); line-height: 1.7;
+    }
+    .model-variants span { display: block; }
+    .model-note {
+      margin-top: .6rem;
+      font-size: .6875rem; font-weight: 500;
+      color: rgba(255,255,255,.25);
+      border-top: 1px solid rgba(255,255,255,.06);
+      padding-top: .5rem;
+    }
+
+    /* ════════════════════════════════
+       COLORS GRID
+       ════════════════════════════════ */
+    .colors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .color-card {
+      background: #0d0d1a;
+      padding: 1.25rem 1rem 1rem;
+      display: flex; flex-direction: column;
+      align-items: center; gap: .75rem;
+      cursor: default; transition: background .2s;
+    }
+    .color-card:hover { background: #12121f; }
+    .color-card.hidden-card { display: none; }
+
+    .color-dot {
+      width: 72px; height: 72px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.1);
+      flex-shrink: 0; transition: transform .2s var(--ease-spring);
+    }
+    .color-card:hover .color-dot { transform: scale(1.07); }
+
+    .color-card--yours .color-dot {
+      width: 84px; height: 84px;
+      box-shadow: 0 0 0 3px rgba(255,255,255,.08);
+    }
+
+    .color-info { text-align: center; width: 100%; }
+    .color-name {
+      font-size: .8125rem; font-weight: 700;
+      color: var(--text-primary); line-height: 1.3;
+      margin-bottom: .3rem;
+    }
+    .color-meta {
+      font-size: .625rem; font-weight: 600;
+      color: var(--text-muted); letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .color-badge-yours {
+      display: inline-block; margin-top: .35rem;
+      font-size: .5rem; font-weight: 800; letter-spacing: .1em;
+      text-transform: uppercase; padding: 2px 7px; border-radius: 100px;
+    }
+
+    /* ─── LE MANS SECTIONS ─── */
+    .lm-intro {
+      background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px; padding: 1.75rem 2rem; margin-bottom: 2rem;
+      display: flex; align-items: center; gap: 1.5rem;
+    }
+    .lm-intro-icon {
+      font-size: 2.5rem; flex-shrink: 0; line-height: 1;
+    }
+    .lm-intro p { font-size: .875rem; line-height: 1.7; color: var(--text-secondary); }
+    .lm-intro strong { color: var(--text-primary); }
+
+    .lm-era-label {
+      font-size: .6875rem; font-weight: 700; letter-spacing: .18em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin: 2rem 0 .75rem;
+      padding-bottom: .5rem; border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .lm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px; overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .lm-card {
+      background: #0d0d1a; padding: 1.25rem 1.5rem;
+      transition: background .2s; position: relative;
+    }
+    .lm-card:hover { background: #12121f; }
+
+    .lm-year {
+      font-size: 2rem; font-weight: 800; letter-spacing: -.04em;
+      color: var(--text-primary); line-height: 1; margin-bottom: .2rem;
+    }
+    .lm-car {
+      font-size: .8125rem; font-weight: 700; color: rgba(255,255,255,.7);
+      margin-bottom: .5rem;
+    }
+    .lm-drivers {
+      font-size: .75rem; color: var(--text-muted); line-height: 1.5;
+      margin-bottom: .4rem;
+    }
+    .lm-note {
+      font-size: .6875rem; font-weight: 500;
+      color: rgba(255,255,255,.2); margin-top: .4rem;
+      border-top: 1px solid rgba(255,255,255,.05); padding-top: .4rem;
+    }
+    .lm-badge {
+      position: absolute; top: 1rem; right: 1rem;
+      font-size: .5rem; font-weight: 800; letter-spacing: .1em;
+      text-transform: uppercase; padding: 2px 7px; border-radius: 100px;
+      background: rgba(232,98,42,.12); border: 1px solid rgba(232,98,42,.3);
+      color: #E8622A;
+    }
+
+    /* Plateaux Le Mans Classique */
+    .plateau-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px; overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    .plateau-card {
+      background: #0d0d1a; padding: 1.25rem 1.5rem; transition: background .2s;
+    }
+    .plateau-card:hover { background: #12121f; }
+    .plateau-num {
+      font-size: .625rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: .3rem;
+    }
+    .plateau-years {
+      font-size: 1.25rem; font-weight: 800; letter-spacing: -.03em;
+      color: var(--text-primary); margin-bottom: .4rem;
+    }
+    .plateau-cars {
+      font-size: .75rem; color: var(--text-secondary); line-height: 1.6;
+    }
+    .plateau-cars .highlight { color: #E8622A; font-weight: 600; }
+
+    /* ─── NO RESULTS ─── */
+    .no-results {
+      text-align: center; padding: 4rem 2rem;
+      color: var(--text-muted); font-size: .9375rem;
+      display: none;
+    }
+    .no-results.visible { display: block; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .models-grid { grid-template-columns: 1fr 1fr; }
+      .colors-grid { grid-template-columns: repeat(3, 1fr); }
+      .model-name { font-size: 1.75rem; }
+    }
+    @media (max-width: 480px) {
+      .models-grid { grid-template-columns: 1fr; }
+      .colors-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ NAV ═══ -->
+  <nav class="nav-glass" id="nav">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-dot"></span>
+      Collection
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#porsche-912">912 Targa</a></li>
+      <li><a href="index.html#porsche-964">964 Turbolook</a></li>
+      <li><a href="index.html#porsche-991">991 Phase 1</a></li>
+      <li><a href="index.html#bmw-x5">X5 xDrive50e</a></li>
+      <li class="nav-sep" aria-hidden="true"></li>
+      <li><a href="catalogue.html" style="color:var(--text-primary)">Catalogue</a></li>
+      <li><a href="lemans-classique.html">Le Mans Classique</a></li>
+    </ul>
+  </nav>
+
+  <!-- ═══ HERO + SEARCH ═══ -->
+  <header class="cat-hero">
+    <p class="cat-eyebrow">Porsche · Base de données complète</p>
+    <h1 class="cat-title">Catalogue</h1>
+    <div class="search-wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="search" id="search-input" placeholder="Rechercher un modèle, une couleur, une année…" autocomplete="off" spellcheck="false">
+    </div>
+  </header>
+
+  <!-- ═══ TABS ═══ -->
+  <div class="cat-tabs">
+    <button class="tab-btn active" data-tab="models">
+      Modèles <span id="models-count" style="opacity:.4;font-weight:400;margin-left:.3rem"></span>
+    </button>
+    <button class="tab-btn" data-tab="colors">
+      Couleurs <span id="colors-count" style="opacity:.4;font-weight:400;margin-left:.3rem"></span>
+    </button>
+    <button class="tab-btn" data-tab="lemans24">24H du Mans</button>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       MODELS TAB
+       ════════════════════════════════════════ -->
+  <section id="tab-models" class="cat-section">
+
+    <div class="filter-row" id="models-filters">
+      <button class="chip active" data-filter="all">Tous</button>
+      <button class="chip" data-filter="911">911 / 912</button>
+      <button class="chip" data-filter="transaxle">Transaxle</button>
+      <button class="chip" data-filter="sport">Moteur central</button>
+      <button class="chip" data-filter="suv">SUV · Berline · Électrique</button>
+    </div>
+
+    <div class="models-grid" id="models-grid">
+
+      <!-- 356 -->
+      <article class="model-card" data-family="911" data-search="356 1948 1965 coupe cabriolet speedster">
+        <div class="model-card-top">
+          <span class="model-years">1948 — 1965</span>
+        </div>
+        <h2 class="model-name">356</h2>
+        <p class="model-gen">Fondatrice · Pré-série</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+          <span class="body-chip">Cabriolet</span>
+          <span class="body-chip">Speedster</span>
+        </div>
+        <div class="model-variants">
+          <span>356 (pré-A) · 356 A · 356 B · 356 C/SC</span>
+          <span>Speedster · Convertible D</span>
+          <span>Carrera 2</span>
+        </div>
+      </article>
+
+      <!-- 912 — VOTRE VOITURE -->
+      <article class="model-card" data-family="911" data-search="912 targa 1965 1969 4 cylindres swb soft window">
+        <div class="model-card-top">
+          <span class="model-years">1965 — 1969</span>
+          <span class="badge-yours">Votre voiture</span>
+        </div>
+        <h2 class="model-name">912</h2>
+        <p class="model-gen">Type 901 · 4 cylindres</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+          <span class="body-chip">Targa</span>
+        </div>
+        <div class="model-variants">
+          <span>912 Coupé SWB</span>
+          <span>912 Targa soft-window</span>
+          <span>912 Targa hard-window</span>
+        </div>
+        <p class="model-note">Flat-4 · 1,6 L · 90 ch</p>
+      </article>
+
+      <!-- 911 (901) -->
+      <article class="model-card" data-family="911" data-search="911 901 1963 1973 carrera rs 2.7 e s t l">
+        <div class="model-card-top">
+          <span class="model-years">1963 — 1973</span>
+        </div>
+        <h2 class="model-name">911</h2>
+        <p class="model-gen">Type 901 · F-Model</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+          <span class="body-chip">Targa</span>
+        </div>
+        <div class="model-variants">
+          <span>911 T · L · E · S (2.0 / 2.2 / 2.4)</span>
+          <span>Carrera RS 2.7</span>
+          <span>Carrera RS 3.0</span>
+        </div>
+      </article>
+
+      <!-- Type G -->
+      <article class="model-card" data-family="911" data-search="type g 930 turbo 1973 1989 carrera 2.7 3.0 sc speedster">
+        <div class="model-card-top">
+          <span class="model-years">1973 — 1989</span>
+        </div>
+        <h2 class="model-name">Type G</h2>
+        <p class="model-gen">930 · Impact bumpers</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+          <span class="body-chip">Targa</span>
+          <span class="body-chip">Cabriolet</span>
+        </div>
+        <div class="model-variants">
+          <span>Carrera 2.7 · 3.0 · 3.2</span>
+          <span>Turbo 3.0 / Turbo 3.3 (930)</span>
+          <span>SC · Speedster · Clubsport</span>
+        </div>
+      </article>
+
+      <!-- 964 — VOTRE VOITURE -->
+      <article class="model-card" data-family="911" data-search="964 1989 1994 carrera 2 4 turbo rs cabriolet turbolook">
+        <div class="model-card-top">
+          <span class="model-years">1989 — 1994</span>
+          <span class="badge-yours blue">Votre voiture</span>
+        </div>
+        <h2 class="model-name">964</h2>
+        <p class="model-gen">Type 964 · 4ème génération</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+          <span class="body-chip">Targa</span>
+          <span class="body-chip">Cabriolet</span>
+        </div>
+        <div class="model-variants">
+          <span>Carrera 2 · Carrera 4</span>
+          <span>Turbo / Turbo 3.6</span>
+          <span>Carrera RS · RS America</span>
+          <span>Speedster · Turbolook</span>
+        </div>
+        <p class="model-note">Flat-6 · 3,6 L · 250 ch (Carrera)</p>
+      </article>
+
+      <!-- 993 -->
+      <article class="model-card" data-family="911" data-search="993 1994 1998 carrera 4s turbo gt2 dernier air cooled">
+        <div class="model-card-top">
+          <span class="model-years">1994 — 1998</span>
+        </div>
+        <h2 class="model-name">993</h2>
+        <p class="model-gen">Dernier refroidi par air</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+          <span class="body-chip">Targa</span>
+          <span class="body-chip">Cabriolet</span>
+        </div>
+        <div class="model-variants">
+          <span>Carrera / S · Carrera 4 / 4S</span>
+          <span>Turbo / Turbo S</span>
+          <span>GT2 · Carrera RS · Speedster</span>
+        </div>
+      </article>
+
+      <!-- 996 -->
+      <article class="model-card" data-family="911" data-search="996 1997 2005 gt3 gt2 turbo water cooled">
+        <div class="model-card-top">
+          <span class="model-years">1997 — 2005</span>
+        </div>
+        <h2 class="model-name">996</h2>
+        <p class="model-gen">1er refroidi par eau</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+          <span class="body-chip">Targa</span>
+          <span class="body-chip">Cabriolet</span>
+        </div>
+        <div class="model-variants">
+          <span>Carrera / Carrera 4 / 4S</span>
+          <span>Turbo / Turbo S · GT2</span>
+          <span>GT3 / GT3 RS · 40th Anniversary</span>
+        </div>
+      </article>
+
+      <!-- 997 -->
+      <article class="model-card" data-family="911" data-search="997 2004 2012 gt3 gt2 rs sport classic targa turbo s">
+        <div class="model-card-top">
+          <span class="model-years">2004 — 2012</span>
+        </div>
+        <h2 class="model-name">997</h2>
+        <p class="model-gen">Type 997</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+          <span class="body-chip">Targa</span>
+          <span class="body-chip">Cabriolet</span>
+        </div>
+        <div class="model-variants">
+          <span>Carrera / S · GTS · Turbo / S</span>
+          <span>GT3 / RS / RS 4.0</span>
+          <span>GT2 / GT2 RS · Sport Classic</span>
+        </div>
+      </article>
+
+      <!-- 991 — VOTRE VOITURE -->
+      <article class="model-card" data-family="911" data-search="991 2011 2019 carrera gts gt3 gt2 rs 911r speedster targa">
+        <div class="model-card-top">
+          <span class="model-years">2011 — 2019</span>
+          <span class="badge-yours blue">Votre voiture</span>
+        </div>
+        <h2 class="model-name">991</h2>
+        <p class="model-gen">Type 991 · Phase 1 & 2</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+          <span class="body-chip">Targa</span>
+          <span class="body-chip">Cabriolet</span>
+        </div>
+        <div class="model-variants">
+          <span>Carrera / S · GTS · Targa 4/4S</span>
+          <span>Turbo / Turbo S</span>
+          <span>GT3 / GT3 RS · GT2 RS · R · Speedster</span>
+        </div>
+        <p class="model-note">Flat-6 · 3,4 L (Phase 1) · 3,0 L turbo (Phase 2)</p>
+      </article>
+
+      <!-- 992 -->
+      <article class="model-card" data-family="911" data-search="992 2019 carrera gts targa turbo gt3 dakar sport classic t-hybrid">
+        <div class="model-card-top">
+          <span class="model-years">2019 — aujourd'hui</span>
+        </div>
+        <h2 class="model-name">992</h2>
+        <p class="model-gen">Type 992 · Génération actuelle</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+          <span class="body-chip">Targa</span>
+          <span class="body-chip">Cabriolet</span>
+        </div>
+        <div class="model-variants">
+          <span>Carrera / S / T · GTS (T-Hybrid)</span>
+          <span>Turbo / Turbo S · GT3 / GT3 RS</span>
+          <span>S/T · Dakar · Sport Classic</span>
+        </div>
+      </article>
+
+      <!-- 924 -->
+      <article class="model-card" data-family="transaxle" data-search="924 1976 1988 transaxle turbo carrera gt gts">
+        <div class="model-card-top">
+          <span class="model-years">1976 — 1988</span>
+        </div>
+        <h2 class="model-name">924</h2>
+        <p class="model-gen">Transaxle · Propulsion</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+        </div>
+        <div class="model-variants">
+          <span>924 · 924 Turbo</span>
+          <span>924 Carrera GT / GTS</span>
+          <span>924 S</span>
+        </div>
+      </article>
+
+      <!-- 944 -->
+      <article class="model-card" data-family="transaxle" data-search="944 1982 1991 transaxle turbo s2 cabriolet">
+        <div class="model-card-top">
+          <span class="model-years">1982 — 1991</span>
+        </div>
+        <h2 class="model-name">944</h2>
+        <p class="model-gen">Transaxle · 4-cylindres</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+          <span class="body-chip">Cabriolet</span>
+        </div>
+        <div class="model-variants">
+          <span>944 · 944 S · 944 S2</span>
+          <span>944 Turbo / Turbo S</span>
+        </div>
+      </article>
+
+      <!-- 928 -->
+      <article class="model-card" data-family="transaxle" data-search="928 1977 1995 v8 gt gts s4">
+        <div class="model-card-top">
+          <span class="model-years">1977 — 1995</span>
+        </div>
+        <h2 class="model-name">928</h2>
+        <p class="model-gen">Transaxle · V8</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé GT</span>
+        </div>
+        <div class="model-variants">
+          <span>928 · 928 S · 928 S4</span>
+          <span>928 GT · 928 GTS</span>
+        </div>
+      </article>
+
+      <!-- 968 -->
+      <article class="model-card" data-family="transaxle" data-search="968 1991 1995 club sport turbo s cabriolet">
+        <div class="model-card-top">
+          <span class="model-years">1991 — 1995</span>
+        </div>
+        <h2 class="model-name">968</h2>
+        <p class="model-gen">Transaxle · Dernier 4-cyl.</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+          <span class="body-chip">Cabriolet</span>
+        </div>
+        <div class="model-variants">
+          <span>968 · 968 Club Sport</span>
+          <span>968 Turbo S</span>
+        </div>
+      </article>
+
+      <!-- 914 -->
+      <article class="model-card" data-family="sport" data-search="914 1969 1976 targa moteur central 4 6 cylindres gt">
+        <div class="model-card-top">
+          <span class="model-years">1969 — 1976</span>
+        </div>
+        <h2 class="model-name">914</h2>
+        <p class="model-gen">Moteur central · Targa</p>
+        <div class="model-bodies">
+          <span class="body-chip">Targa</span>
+        </div>
+        <div class="model-variants">
+          <span>914/4 (1.7 / 1.8 / 2.0)</span>
+          <span>914/6 · 914/6 GT</span>
+        </div>
+      </article>
+
+      <!-- 959 -->
+      <article class="model-card" data-family="sport" data-search="959 1986 1993 supercar 4x4 komfort sport awd">
+        <div class="model-card-top">
+          <span class="model-years">1986 — 1993</span>
+        </div>
+        <h2 class="model-name">959</h2>
+        <p class="model-gen">Supercar · 4RM</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+        </div>
+        <div class="model-variants">
+          <span>959 Komfort · 959 Sport · 959 S</span>
+        </div>
+        <p class="model-note">Flat-6 biturbo · 450 ch · 4RM</p>
+      </article>
+
+      <!-- Carrera GT -->
+      <article class="model-card" data-family="sport" data-search="carrera gt 980 2003 2007 v10 roadster">
+        <div class="model-card-top">
+          <span class="model-years">2003 — 2007</span>
+        </div>
+        <h2 class="model-name">Carrera GT</h2>
+        <p class="model-gen">Type 980 · V10</p>
+        <div class="model-bodies">
+          <span class="body-chip">Roadster</span>
+        </div>
+        <div class="model-variants">
+          <span>Carrera GT</span>
+        </div>
+        <p class="model-note">V10 atmosphérique · 5,7 L · 612 ch</p>
+      </article>
+
+      <!-- 918 -->
+      <article class="model-card" data-family="sport" data-search="918 spyder 2013 2015 hybride v8 weissach">
+        <div class="model-card-top">
+          <span class="model-years">2013 — 2015</span>
+        </div>
+        <h2 class="model-name">918 Spyder</h2>
+        <p class="model-gen">Hybride · 887 ch</p>
+        <div class="model-bodies">
+          <span class="body-chip">Roadster</span>
+        </div>
+        <div class="model-variants">
+          <span>918 Spyder</span>
+          <span>918 Weissach Package</span>
+        </div>
+        <p class="model-note">V8 + 2 moteurs élec. · 887 ch</p>
+      </article>
+
+      <!-- Boxster / 718 -->
+      <article class="model-card" data-family="sport" data-search="boxster 718 986 987 981 982 1996 roadster spyder gts">
+        <div class="model-card-top">
+          <span class="model-years">1996 — aujourd'hui</span>
+        </div>
+        <h2 class="model-name">Boxster</h2>
+        <p class="model-gen">986 → 987 → 981 → 718</p>
+        <div class="model-bodies">
+          <span class="body-chip">Roadster</span>
+        </div>
+        <div class="model-variants">
+          <span>Boxster / S / GTS / 25 ans</span>
+          <span>Boxster Spyder / RS</span>
+          <span>718 Boxster (2.0 / 2.5 / 4.0)</span>
+        </div>
+      </article>
+
+      <!-- Cayman / 718 -->
+      <article class="model-card" data-family="sport" data-search="cayman 987c 981c 718 2005 coupe gt4 gt4rs">
+        <div class="model-card-top">
+          <span class="model-years">2005 — aujourd'hui</span>
+        </div>
+        <h2 class="model-name">Cayman</h2>
+        <p class="model-gen">987C → 981C → 718</p>
+        <div class="model-bodies">
+          <span class="body-chip">Coupé</span>
+        </div>
+        <div class="model-variants">
+          <span>Cayman / S / GTS / R</span>
+          <span>Cayman GT4 / GT4 RS</span>
+          <span>718 Cayman (2.0 / 2.5 / 4.0)</span>
+        </div>
+      </article>
+
+      <!-- Cayenne -->
+      <article class="model-card" data-family="suv" data-search="cayenne 9pa 92a 9ya 2002 suv turbo hybrid diesel">
+        <div class="model-card-top">
+          <span class="model-years">2002 — aujourd'hui</span>
+        </div>
+        <h2 class="model-name">Cayenne</h2>
+        <p class="model-gen">9PA → 92A → 9YA · SUV</p>
+        <div class="model-bodies">
+          <span class="body-chip">SUV</span>
+          <span class="body-chip">SUV Coupé</span>
+        </div>
+        <div class="model-variants">
+          <span>Cayenne / S / GTS</span>
+          <span>Turbo / Turbo S / Turbo GT</span>
+          <span>S E-Hybrid / Turbo S E-Hybrid</span>
+        </div>
+      </article>
+
+      <!-- Panamera -->
+      <article class="model-card" data-family="suv" data-search="panamera 970 971 2009 berline sport turismo executive">
+        <div class="model-card-top">
+          <span class="model-years">2009 — aujourd'hui</span>
+        </div>
+        <h2 class="model-name">Panamera</h2>
+        <p class="model-gen">970 → 971 · Berline</p>
+        <div class="model-bodies">
+          <span class="body-chip">Berline</span>
+          <span class="body-chip">Sport Turismo</span>
+        </div>
+        <div class="model-variants">
+          <span>Panamera / 4 / 4S / GTS</span>
+          <span>Turbo / Turbo S · E-Hybrid</span>
+          <span>Executive (LWB)</span>
+        </div>
+      </article>
+
+      <!-- Macan -->
+      <article class="model-card" data-family="suv" data-search="macan 95b 2014 suv compact electrique ev">
+        <div class="model-card-top">
+          <span class="model-years">2014 — aujourd'hui</span>
+        </div>
+        <h2 class="model-name">Macan</h2>
+        <p class="model-gen">95B · SUV compact</p>
+        <div class="model-bodies">
+          <span class="body-chip">SUV compact</span>
+        </div>
+        <div class="model-variants">
+          <span>Macan / T / S / GTS / Turbo</span>
+          <span>Macan électrique : 4 / 4S / Turbo</span>
+        </div>
+      </article>
+
+      <!-- Taycan -->
+      <article class="model-card" data-family="suv" data-search="taycan y1a 2019 electrique berline ev turbo gts">
+        <div class="model-card-top">
+          <span class="model-years">2019 — aujourd'hui</span>
+        </div>
+        <h2 class="model-name">Taycan</h2>
+        <p class="model-gen">Y1A · 100 % électrique</p>
+        <div class="model-bodies">
+          <span class="body-chip">Berline</span>
+          <span class="body-chip">Cross Turismo</span>
+        </div>
+        <div class="model-variants">
+          <span>Taycan / 4 / 4S · GTS</span>
+          <span>Turbo / Turbo S / Turbo GT</span>
+          <span>Sport Turismo / Cross Turismo</span>
+        </div>
+      </article>
+
+    </div>
+    <p class="no-results" id="models-no-results">Aucun modèle trouvé pour cette recherche.</p>
+  </section>
+
+
+  <!-- ════════════════════════════════════════
+       COLORS TAB
+       ════════════════════════════════════════ -->
+  <section id="tab-colors" class="cat-section hidden">
+
+    <div class="filter-row" id="colors-filters">
+      <button class="chip active" data-filter="all">Toutes</button>
+      <button class="chip" data-filter="serie">Série</button>
+      <button class="chip" data-filter="historique">Historiques</button>
+      <button class="chip" data-filter="pts">Paint to Sample</button>
+    </div>
+
+    <div class="colors-grid" id="colors-grid">
+
+      <!-- VOS TEINTES -->
+      <div class="color-card color-card--yours" data-type="historique" data-search="orange signal historique annees 70 912"><div class="color-dot" style="background:#E8622A;box-shadow:0 0 24px rgba(232,98,42,.4)"></div><div class="color-info"><p class="color-name">Orange Signal</p><p class="color-meta">Historique · Années 70</p><span class="color-badge-yours" style="background:rgba(232,98,42,.15);border:1px solid rgba(232,98,42,.4);color:#E8622A">Votre 912</span></div></div>
+      <div class="color-card color-card--yours" data-type="serie" data-search="bleu nuit metallise serie 964 991"><div class="color-dot" style="background:#0D1B3E;box-shadow:0 0 24px rgba(26,58,122,.45)"></div><div class="color-info"><p class="color-name">Bleu Nuit métallisé</p><p class="color-meta">Métallisé · Série</p><span class="color-badge-yours" style="background:rgba(26,58,122,.2);border:1px solid rgba(26,58,122,.5);color:#6e9fd4">Votre 964 · 991</span></div></div>
+
+      <!-- SERIE SOLIDES -->
+      <div class="color-card" data-type="serie" data-search="noir solide serie catalogue actuel"><div class="color-dot" style="background:#1c1c1e"></div><div class="color-info"><p class="color-name">Noir</p><p class="color-meta">Solide · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="blanc solide serie catalogue actuel"><div class="color-dot" style="background:#f0efe8;border-color:rgba(255,255,255,.25)"></div><div class="color-info"><p class="color-name">Blanc</p><p class="color-meta">Solide · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="rouge indien guards red solide emblematique 1970"><div class="color-dot" style="background:#BC2229"></div><div class="color-info"><p class="color-name">Rouge Indien (Guards Red)</p><p class="color-meta">Solide · Emblématique</p></div></div>
+      <div class="color-card" data-type="serie" data-search="jaune racing yellow solide serie catalogue actuel"><div class="color-dot" style="background:#ECC400"></div><div class="color-info"><p class="color-name">Jaune Racing (Racing Yellow)</p><p class="color-meta">Solide · Série</p></div></div>
+
+      <!-- SERIE METALLISEES -->
+      <div class="color-card" data-type="serie" data-search="noir intense metallise serie catalogue actuel"><div class="color-dot" style="background:#242428"></div><div class="color-info"><p class="color-name">Noir Intense métallisé</p><p class="color-meta">Métallisé · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="gris quartz metallise serie catalogue actuel"><div class="color-dot" style="background:#8e8e96"></div><div class="color-info"><p class="color-name">Gris Quartz métallisé</p><p class="color-meta">Métallisé · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="gris aventurine metallise serie catalogue actuel"><div class="color-dot" style="background:#7a7c80"></div><div class="color-info"><p class="color-name">Gris Aventurine métallisé</p><p class="color-meta">Métallisé · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="argent gt metallise silver serie catalogue actuel"><div class="color-dot" style="background:#c0c0ca"></div><div class="color-info"><p class="color-name">Argent GT métallisé</p><p class="color-meta">Métallisé · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="gris dolomite metallise serie catalogue actuel"><div class="color-dot" style="background:#b0b0b8"></div><div class="color-info"><p class="color-name">Gris Dolomite métallisé</p><p class="color-meta">Métallisé · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="bleu gentiane metallise serie catalogue actuel"><div class="color-dot" style="background:#1a4a9e"></div><div class="color-info"><p class="color-name">Bleu Gentiane métallisé</p><p class="color-meta">Métallisé · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="vert oak metallise neo serie catalogue actuel green"><div class="color-dot" style="background:#5a6b3a"></div><div class="color-info"><p class="color-name">Vert Oak métallisé néo</p><p class="color-meta">Métallisé · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="brun truffe metallise serie catalogue actuel brown"><div class="color-dot" style="background:#6b4a30"></div><div class="color-info"><p class="color-name">Brun Truffe métallisé</p><p class="color-meta">Métallisé · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="blanc carrara metallise serie catalogue actuel"><div class="color-dot" style="background:#e8e5de;border-color:rgba(255,255,255,.2)"></div><div class="color-info"><p class="color-name">Blanc Carrara métallisé</p><p class="color-meta">Métallisé · Série</p></div></div>
+
+      <!-- SERIE SPECIALES -->
+      <div class="color-card" data-type="serie" data-search="shark blue bleu requin speciale serie catalogue"><div class="color-dot" style="background:#1a5a8a"></div><div class="color-info"><p class="color-name">Bleu Requin (Shark Blue)</p><p class="color-meta">Spéciale · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="python green vert python speciale serie catalogue"><div class="color-dot" style="background:#6ab040"></div><div class="color-info"><p class="color-name">Vert Python (Python Green)</p><p class="color-meta">Spéciale · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="lizard green jaune lezard speciale serie catalogue"><div class="color-dot" style="background:#c4d600"></div><div class="color-info"><p class="color-name">Jaune Lézard (Lizard Green)</p><p class="color-meta">Spéciale · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="bleu glacier metallise speciale serie catalogue actuel"><div class="color-dot" style="background:#4a9fc8"></div><div class="color-info"><p class="color-name">Bleu Glacier métallisé</p><p class="color-meta">Spéciale · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="bleu gulf blue speciale serie heritage gt"><div class="color-dot" style="background:#3E9FCC"></div><div class="color-info"><p class="color-name">Bleu Gulf</p><p class="color-meta">Spéciale · Heritage / GT</p></div></div>
+      <div class="color-card" data-type="serie" data-search="rouge carmin carmine red speciale serie catalogue"><div class="color-dot" style="background:#c41e3a"></div><div class="color-info"><p class="color-name">Rouge Carmin (Carmine Red)</p><p class="color-meta">Spéciale · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="crayon gris clair light grey speciale serie"><div class="color-dot" style="background:#d0cfcc;border-color:rgba(255,255,255,.15)"></div><div class="color-info"><p class="color-name">Crayon (Crayon gris clair)</p><p class="color-meta">Spéciale · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="blanc chalk craie speciale serie catalogue actuel"><div class="color-dot" style="background:#bab8b2;border-color:rgba(255,255,255,.15)"></div><div class="color-info"><p class="color-name">Blanc Chalk (Craie)</p><p class="color-meta">Spéciale · Série</p></div></div>
+      <div class="color-card" data-type="serie" data-search="vert aventurine neo speciale serie catalogue actuel"><div class="color-dot" style="background:#7d9a52"></div><div class="color-info"><p class="color-name">Vert Aventurine néo</p><p class="color-meta">Spéciale · Série</p></div></div>
+
+      <!-- HISTORIQUES -->
+      <div class="color-card" data-type="historique" data-search="bleu mexique mexico blue historique annees 60 70"><div class="color-dot" style="background:#1e5fa8"></div><div class="color-info"><p class="color-name">Bleu Mexique (Mexico Blue)</p><p class="color-meta">Historique · Années 60–70</p></div></div>
+      <div class="color-card" data-type="historique" data-search="blood orange sang historique annees 70"><div class="color-dot" style="background:#c94824"></div><div class="color-info"><p class="color-name">Orange Sang (Blood Orange)</p><p class="color-meta">Historique · Années 70</p></div></div>
+      <div class="color-card" data-type="historique" data-search="vert olive olive historique annees 70"><div class="color-dot" style="background:#6a6b3a"></div><div class="color-info"><p class="color-name">Vert Olive (Olive)</p><p class="color-meta">Historique · Années 70</p></div></div>
+      <div class="color-card" data-type="historique" data-search="irish green vert irlandais historique annees 60 70"><div class="color-dot" style="background:#3c7240"></div><div class="color-info"><p class="color-name">Vert Irlandais (Irish Green)</p><p class="color-meta">Historique · Années 60–70</p></div></div>
+      <div class="color-card" data-type="historique" data-search="viper green vert viper historique annees 70"><div class="color-dot" style="background:#89b33a"></div><div class="color-info"><p class="color-name">Vert Viper (Viper Green)</p><p class="color-meta">Historique · Années 70</p></div></div>
+      <div class="color-card" data-type="historique" data-search="lemon yellow jaune citron historique annees 70"><div class="color-dot" style="background:#f5e800"></div><div class="color-info"><p class="color-name">Jaune Citron (Lemon Yellow)</p><p class="color-meta">Historique · Années 70</p></div></div>
+      <div class="color-card" data-type="historique" data-search="brun sepia sepia brown historique annees 70"><div class="color-dot" style="background:#7a5040"></div><div class="color-info"><p class="color-name">Brun Sépia (Sepia Brown)</p><p class="color-meta">Historique · Années 70</p></div></div>
+      <div class="color-card" data-type="historique" data-search="bleu albert albert blue historique annees 70"><div class="color-dot" style="background:#4567a8"></div><div class="color-info"><p class="color-name">Bleu Albert (Albert Blue)</p><p class="color-meta">Historique · Années 70</p></div></div>
+      <div class="color-card" data-type="historique" data-search="bleu minerve minerva blue historique annees 70"><div class="color-dot" style="background:#2a4f9a"></div><div class="color-info"><p class="color-name">Bleu Minerve (Minerva Blue)</p><p class="color-meta">Historique · Années 70</p></div></div>
+      <div class="color-card" data-type="historique" data-search="rouge indischrot historique annees 70 80"><div class="color-dot" style="background:#8b1a1a"></div><div class="color-info"><p class="color-name">Rouge Indischrot</p><p class="color-meta">Historique · Années 70–80</p></div></div>
+      <div class="color-card" data-type="historique" data-search="beige pierre stone grey historique annees 70"><div class="color-dot" style="background:#a89880;border-color:rgba(255,255,255,.12)"></div><div class="color-info"><p class="color-name">Beige Pierre (Stone Grey)</p><p class="color-meta">Historique · Années 70</p></div></div>
+      <div class="color-card" data-type="historique" data-search="argent metallise silver historique annees 70 80"><div class="color-dot" style="background:#c8c8c0;border-color:rgba(255,255,255,.18)"></div><div class="color-info"><p class="color-name">Argent Métallisé (Silver)</p><p class="color-meta">Historique · Années 70–80</p></div></div>
+      <div class="color-card" data-type="historique" data-search="bleu petrole petrol blue historique annees 80 90"><div class="color-dot" style="background:#2b5e7a"></div><div class="color-info"><p class="color-name">Bleu Pétrole (Petrol Blue)</p><p class="color-meta">Historique · Années 80–90</p></div></div>
+      <div class="color-card" data-type="historique" data-search="violet amethyste amethyst historique annees 90"><div class="color-dot" style="background:#8f5eaf"></div><div class="color-info"><p class="color-name">Violet Améthyste (Amethyst)</p><p class="color-meta">Historique · Années 90</p></div></div>
+      <div class="color-card" data-type="historique" data-search="vert wimbledon wimbledon green historique annees 90"><div class="color-dot" style="background:#4a7c4e"></div><div class="color-info"><p class="color-name">Vert Wimbledon</p><p class="color-meta">Historique · Années 90</p></div></div>
+      <div class="color-card" data-type="historique" data-search="bleu riviera riviera blue historique annees 90"><div class="color-dot" style="background:#4b86c1"></div><div class="color-info"><p class="color-name">Bleu Riviera</p><p class="color-meta">Historique · Années 90</p></div></div>
+      <div class="color-card" data-type="historique" data-search="speed yellow jaune speed historique annees 90 2000"><div class="color-dot" style="background:#eec900"></div><div class="color-info"><p class="color-name">Speed Yellow</p><p class="color-meta">Historique · Années 90–2000</p></div></div>
+      <div class="color-card" data-type="historique" data-search="cobalt blue bleu cobalt historique annees 90 2000"><div class="color-dot" style="background:#0047ab"></div><div class="color-info"><p class="color-name">Bleu Cobalt (Cobalt Blue)</p><p class="color-meta">Historique · Années 90–2000</p></div></div>
+      <div class="color-card" data-type="historique" data-search="rubystar rubystone red vert rouge historique 964 rs"><div class="color-dot" style="background:#8b2040"></div><div class="color-info"><p class="color-name">Vert Rubystar / Rubystone Red</p><p class="color-meta">Historique · 964 RS</p></div></div>
+      <div class="color-card" data-type="historique" data-search="maritime blue bleu maritime historique annees 90"><div class="color-dot" style="background:#1e3a6a"></div><div class="color-info"><p class="color-name">Maritime Blue</p><p class="color-meta">Historique · Années 90</p></div></div>
+
+      <!-- PAINT TO SAMPLE -->
+      <div class="color-card" data-type="pts" data-search="riviera blue pts paint to sample tres demande"><div class="color-dot" style="background:#4b86c1"></div><div class="color-info"><p class="color-name">Riviera Blue</p><p class="color-meta">PTS · Très demandé</p></div></div>
+      <div class="color-card" data-type="pts" data-search="voodoo blue pts paint to sample"><div class="color-dot" style="background:#1b2f7a"></div><div class="color-info"><p class="color-name">Voodoo Blue</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="mexico blue bleu mexique pts paint to sample"><div class="color-dot" style="background:#1e5fa8"></div><div class="color-info"><p class="color-name">Mexico Blue</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="maritime blue pts paint to sample"><div class="color-dot" style="background:#1e3a6a"></div><div class="color-info"><p class="color-name">Maritime Blue</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="gulf blue bleu gulf pts paint to sample"><div class="color-dot" style="background:#3E9FCC"></div><div class="color-info"><p class="color-name">Gulf Blue</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="azzurro pearl pts paint to sample bleu clair"><div class="color-dot" style="background:#a8d4e8;border-color:rgba(255,255,255,.18)"></div><div class="color-info"><p class="color-name">Azzurro Pearl</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="glacier blue bleu glacier pts paint to sample"><div class="color-dot" style="background:#4a9fc8"></div><div class="color-info"><p class="color-name">Glacier Blue</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="cobalt blue bleu cobalt pts paint to sample"><div class="color-dot" style="background:#0047ab"></div><div class="color-info"><p class="color-name">Cobalt Blue</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="aetna blue pts paint to sample"><div class="color-dot" style="background:#3a6a9e"></div><div class="color-info"><p class="color-name">Aetna Blue</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="pastel blue bleu pastel pts paint to sample"><div class="color-dot" style="background:#7ab0d4"></div><div class="color-info"><p class="color-name">Pastel Blue</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="signal green vert signal pts paint to sample"><div class="color-dot" style="background:#52a840"></div><div class="color-info"><p class="color-name">Signal Green</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="oak green metallic vert oak pts paint to sample"><div class="color-dot" style="background:#5a7034"></div><div class="color-info"><p class="color-name">Oak Green Metallic</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="brewster green vert brewster pts paint to sample"><div class="color-dot" style="background:#2a5a36"></div><div class="color-info"><p class="color-name">Brewster Green</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="olive green vert olive pts paint to sample"><div class="color-dot" style="background:#6a6b3a"></div><div class="color-info"><p class="color-name">Olive Green</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="viper green vert viper pts paint to sample"><div class="color-dot" style="background:#89b33a"></div><div class="color-info"><p class="color-name">Viper Green</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="light green vert clair pts paint to sample"><div class="color-dot" style="background:#8ec86a"></div><div class="color-info"><p class="color-name">Light Green</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="birch green vert bouleau pts paint to sample"><div class="color-dot" style="background:#6a8a5a"></div><div class="color-info"><p class="color-name">Birch Green</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="signal yellow jaune signal pts paint to sample"><div class="color-dot" style="background:#f5d020"></div><div class="color-info"><p class="color-name">Signal Yellow</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="speed yellow jaune speed pts paint to sample"><div class="color-dot" style="background:#eec900"></div><div class="color-info"><p class="color-name">Speed Yellow</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="acid green vert acide pts paint to sample"><div class="color-dot" style="background:#b0c820"></div><div class="color-info"><p class="color-name">Acid Green</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="signal orange pts paint to sample"><div class="color-dot" style="background:#E8622A"></div><div class="color-info"><p class="color-name">Signal Orange</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="blood orange sang pts paint to sample"><div class="color-dot" style="background:#c94824"></div><div class="color-info"><p class="color-name">Blood Orange</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="gold bronze metallic or pts paint to sample"><div class="color-dot" style="background:#c8a040"></div><div class="color-info"><p class="color-name">Gold Bronze Metallic</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="rubystone red rouge pts paint to sample"><div class="color-dot" style="background:#8b2040"></div><div class="color-info"><p class="color-name">Rubystone Red</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="india red rouge indien pts paint to sample"><div class="color-dot" style="background:#c4362a"></div><div class="color-info"><p class="color-name">India Red</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="cardinal red rouge cardinal pts paint to sample"><div class="color-dot" style="background:#9b1f2e"></div><div class="color-info"><p class="color-name">Cardinal Red</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="salmon metallic saumon pts paint to sample"><div class="color-dot" style="background:#d4926e"></div><div class="color-info"><p class="color-name">Salmon Metallic</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="rubystar rouge pts paint to sample"><div class="color-dot" style="background:#9b2a48"></div><div class="color-info"><p class="color-name">Rubystar</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="pink rose pts paint to sample"><div class="color-dot" style="background:#e8a8b8"></div><div class="color-info"><p class="color-name">Pink (Rosé)</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="amethyst metallic violet amethyste pts paint to sample"><div class="color-dot" style="background:#8f5eaf"></div><div class="color-info"><p class="color-name">Amethyst Metallic</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="cassis red metallic rouge cassis pts paint to sample"><div class="color-dot" style="background:#7a1a3a"></div><div class="color-info"><p class="color-name">Cassis Red Metallic</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="espresso metallic brun marron pts paint to sample"><div class="color-dot" style="background:#3d2b1f"></div><div class="color-info"><p class="color-name">Espresso Metallic</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="sepia brown brun sepia pts paint to sample"><div class="color-dot" style="background:#7a5040"></div><div class="color-info"><p class="color-name">Sepia Brown</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="cognac metallic cognac brun pts paint to sample"><div class="color-dot" style="background:#8b7355"></div><div class="color-info"><p class="color-name">Cognac Metallic</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="slate grey gris ardoise pts paint to sample"><div class="color-dot" style="background:#6a6a72"></div><div class="color-info"><p class="color-name">Slate Grey</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="fashion grey gris fashion pts paint to sample"><div class="color-dot" style="background:#9a9a9e"></div><div class="color-info"><p class="color-name">Fashion Grey</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="nardo grey gris nardo pts paint to sample"><div class="color-dot" style="background:#7f7f7f"></div><div class="color-info"><p class="color-name">Nardo Grey</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="chalk gris clair pts paint to sample"><div class="color-dot" style="background:#bab8b2;border-color:rgba(255,255,255,.15)"></div><div class="color-info"><p class="color-name">Chalk</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="ivory ivoire creme pts paint to sample"><div class="color-dot" style="background:#f0ead6;border-color:rgba(255,255,255,.18)"></div><div class="color-info"><p class="color-name">Ivory</p><p class="color-meta">Paint to Sample</p></div></div>
+      <div class="color-card" data-type="pts" data-search="light ivory ivoire clair pts paint to sample"><div class="color-dot" style="background:#f5f0e0;border-color:rgba(255,255,255,.18)"></div><div class="color-info"><p class="color-name">Light Ivory</p><p class="color-meta">Paint to Sample</p></div></div>
+
+    </div>
+    <p class="no-results" id="colors-no-results">Aucune couleur trouvée pour cette recherche.</p>
+  </section>
+
+
+  <!-- ════════════════════════════════════════
+       24H DU MANS TAB
+       ════════════════════════════════════════ -->
+  <section id="tab-lemans24" class="cat-section hidden">
+
+    <div class="lm-intro">
+      <div class="lm-intro-icon">🏁</div>
+      <p><strong>Porsche au Mans — 19 victoires absolues.</strong> Aucun constructeur n'a dominé les 24 Heures du Mans avec autant de constance. De la 917K en 1970 à la 919 Hybrid en 2017, chaque décennie a vu Porsche inscrire son nom sur la liste d'honneur de la Sarthe.</p>
+    </div>
+
+    <p class="lm-era-label">Ère 917 · 1970–1971</p>
+    <div class="lm-grid">
+      <div class="lm-card">
+        <div class="lm-year">1970</div>
+        <div class="lm-car">Porsche 917K</div>
+        <div class="lm-drivers">Richard Attwood · Hans Herrmann</div>
+        <div class="lm-note">Première victoire absolue de Porsche au Mans</div>
+      </div>
+      <div class="lm-card">
+        <div class="lm-year">1971</div>
+        <div class="lm-car">Porsche 917K</div>
+        <div class="lm-drivers">Helmut Marko · Gijs van Lennep</div>
+        <div class="lm-note">Record de distance (5 335 km) tenu 39 ans</div>
+      </div>
+    </div>
+
+    <p class="lm-era-label">Ère 936 · 1976–1981</p>
+    <div class="lm-grid">
+      <div class="lm-card">
+        <div class="lm-year">1976</div>
+        <div class="lm-car">Porsche 936/76</div>
+        <div class="lm-drivers">Jacky Ickx · Gijs van Lennep</div>
+      </div>
+      <div class="lm-card">
+        <div class="lm-year">1977</div>
+        <div class="lm-car">Porsche 936/77</div>
+        <div class="lm-drivers">Jacky Ickx · Jürgen Barth · Hurley Haywood</div>
+      </div>
+      <div class="lm-card">
+        <div class="lm-year">1979</div>
+        <div class="lm-car">Porsche 935 K3</div>
+        <div class="lm-drivers">Klaus Ludwig · Don Whittington · Bill Whittington</div>
+        <div class="lm-note">Victoire privée en 935</div>
+      </div>
+      <div class="lm-card">
+        <div class="lm-year">1981</div>
+        <div class="lm-car">Porsche 936/81</div>
+        <div class="lm-drivers">Jacky Ickx · Derek Bell</div>
+        <div class="lm-note">5ème victoire pour Ickx — record absolu</div>
+      </div>
+    </div>
+
+    <p class="lm-era-label">Ère 956 / 962 · 1982–1987</p>
+    <div class="lm-grid">
+      <div class="lm-card">
+        <div class="lm-year">1982</div>
+        <div class="lm-car">Porsche 956</div>
+        <div class="lm-drivers">Jacky Ickx · Derek Bell</div>
+        <div class="lm-badge">6 ans de suite</div>
+      </div>
+      <div class="lm-card">
+        <div class="lm-year">1983</div>
+        <div class="lm-car">Porsche 956</div>
+        <div class="lm-drivers">Al Holbert · Hurley Haywood · Vern Schuppan</div>
+      </div>
+      <div class="lm-card">
+        <div class="lm-year">1984</div>
+        <div class="lm-car">Porsche 956</div>
+        <div class="lm-drivers">Klaus Ludwig · Henri Pescarolo</div>
+      </div>
+      <div class="lm-card">
+        <div class="lm-year">1985</div>
+        <div class="lm-car">Porsche 956B</div>
+        <div class="lm-drivers">Klaus Ludwig · Paolo Barilla · John Winter</div>
+      </div>
+      <div class="lm-card">
+        <div class="lm-year">1986</div>
+        <div class="lm-car">Porsche 962C</div>
+        <div class="lm-drivers">Derek Bell · Hans-Joachim Stuck · Al Holbert</div>
+      </div>
+      <div class="lm-card">
+        <div class="lm-year">1987</div>
+        <div class="lm-car">Porsche 962C</div>
+        <div class="lm-drivers">Derek Bell · Hans-Joachim Stuck · Al Holbert</div>
+      </div>
+    </div>
+
+    <p class="lm-era-label">Années 1990–2000</p>
+    <div class="lm-grid">
+      <div class="lm-card">
+        <div class="lm-year">1994</div>
+        <div class="lm-car">Dauer 962 LM</div>
+        <div class="lm-drivers">Yannick Dalmas · Hurley Haywood · Mauro Baldi</div>
+        <div class="lm-note">962 homologuée GT route</div>
+      </div>
+      <div class="lm-card">
+        <div class="lm-year">1996</div>
+        <div class="lm-car">TWR-Porsche WSC-95</div>
+        <div class="lm-drivers">Davy Jones · Manuel Reuter · Alexander Wurz</div>
+      </div>
+      <div class="lm-card">
+        <div class="lm-year">1997</div>
+        <div class="lm-car">TWR-Porsche WSC-95</div>
+        <div class="lm-drivers">M. Alboreto · S. Johansson · Tom Kristensen</div>
+      </div>
+      <div class="lm-card">
+        <div class="lm-year">1998</div>
+        <div class="lm-car">Porsche 911 GT1-98</div>
+        <div class="lm-drivers">Allan McNish · Stéphane Sarrazin · Laurent Aiello</div>
+        <div class="lm-note">Victoire in extremis sur McLaren F1 GTR</div>
+      </div>
+    </div>
+
+    <p class="lm-era-label">Ère 919 Hybrid · 2015–2017</p>
+    <div class="lm-grid">
+      <div class="lm-card">
+        <div class="lm-year">2015</div>
+        <div class="lm-car">Porsche 919 Hybrid</div>
+        <div class="lm-drivers">Nico Hülkenberg · Nick Tandy · Earl Bamber</div>
+        <div class="lm-note">Retour Porsche en prototype après 16 ans</div>
+        <div class="lm-badge">Triplé</div>
+      </div>
+      <div class="lm-card">
+        <div class="lm-year">2016</div>
+        <div class="lm-car">Porsche 919 Hybrid</div>
+        <div class="lm-drivers">Earl Bamber · Timo Bernhard · Brendon Hartley</div>
+      </div>
+      <div class="lm-card">
+        <div class="lm-year">2017</div>
+        <div class="lm-car">Porsche 919 Hybrid</div>
+        <div class="lm-drivers">Timo Bernhard · Earl Bamber · Brendon Hartley</div>
+        <div class="lm-note">19ème victoire absolue — record mondial</div>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- ════════════════════════════════════════
+       LE MANS CLASSIQUE TAB
+       ════════════════════════════════════════ -->
+  <section id="tab-lemansc" class="cat-section hidden">
+
+    <div class="lm-intro">
+      <div class="lm-intro-icon">🏛️</div>
+      <p><strong>Le Mans Classique</strong> est un événement bisannuel organisé sur le circuit de la Sarthe, permettant aux voitures historiques ayant participé aux 24 Heures de se retrouver sur la piste. Les voitures sont regroupées en <strong>Plateaux</strong> selon leur année de construction. Porsche est historiquement l'une des marques les plus représentées à chaque édition.</p>
+    </div>
+
+    <p class="lm-era-label">Éditions</p>
+    <div class="lm-grid">
+      <div class="lm-card"><div class="lm-year">2002</div><div class="lm-car">1ère édition</div><div class="lm-drivers">Circuit de la Sarthe · Fondation de l'événement</div></div>
+      <div class="lm-card"><div class="lm-year">2004</div><div class="lm-car">2ème édition</div><div class="lm-drivers">Présence Porsche croissante — 904, 911, 917</div></div>
+      <div class="lm-card"><div class="lm-year">2006</div><div class="lm-car">3ème édition</div><div class="lm-drivers">Centenaire du Grand Prix de l'ACO</div></div>
+      <div class="lm-card"><div class="lm-year">2008</div><div class="lm-car">4ème édition</div><div class="lm-drivers">Nuit complète incluse pour la première fois</div></div>
+      <div class="lm-card"><div class="lm-year">2010</div><div class="lm-car">5ème édition</div><div class="lm-drivers">50 ans de la victoire Porsche 1970</div></div>
+      <div class="lm-card"><div class="lm-year">2012</div><div class="lm-car">6ème édition</div><div class="lm-drivers">Record de participation — 450 voitures</div></div>
+      <div class="lm-card"><div class="lm-year">2014</div><div class="lm-car">7ème édition</div><div class="lm-drivers">Retour de Porsche en LMP1 célébré</div></div>
+      <div class="lm-card"><div class="lm-year">2016</div><div class="lm-car">8ème édition</div><div class="lm-drivers">50 ans de la 906 Carrera 6</div></div>
+      <div class="lm-card"><div class="lm-year">2018</div><div class="lm-car">9ème édition</div><div class="lm-drivers">50 ans du 908 — présence exceptionnelle</div></div>
+      <div class="lm-card"><div class="lm-year">2021</div><div class="lm-car">10ème édition</div><div class="lm-drivers">Reportée d'un an (Covid) — 50 ans de la 917</div></div>
+      <div class="lm-card"><div class="lm-year">2023</div><div class="lm-car">11ème édition</div><div class="lm-drivers">Juillet 2023 · 25 ans du Mans Classique</div></div>
+      <div class="lm-card"><div class="lm-year">2025</div><div class="lm-car">12ème édition</div><div class="lm-drivers">Prochaine édition · Juillet 2025</div></div>
+    </div>
+
+    <p class="lm-era-label">Plateaux — Porsche éligibles</p>
+    <div class="plateau-grid">
+      <div class="plateau-card">
+        <div class="plateau-num">Plateau 2</div>
+        <div class="plateau-years">1923 — 1939</div>
+        <div class="plateau-cars">Modèles pré-guerre (Porsche non applicable)</div>
+      </div>
+      <div class="plateau-card">
+        <div class="plateau-num">Plateau 3</div>
+        <div class="plateau-years">1949 — 1956</div>
+        <div class="plateau-cars"><span class="highlight">550 Spyder</span> · 550A Spyder · 356 SL<br>Premières victoires de classe Porsche au Mans</div>
+      </div>
+      <div class="plateau-card">
+        <div class="plateau-num">Plateau 4</div>
+        <div class="plateau-years">1957 — 1961</div>
+        <div class="plateau-cars"><span class="highlight">718 RSK</span> · 718 RS 60 · 718 RS 61<br>550A · Carrera Abarth GTL</div>
+      </div>
+      <div class="plateau-card">
+        <div class="plateau-num">Plateau 5</div>
+        <div class="plateau-years">1962 — 1965</div>
+        <div class="plateau-cars"><span class="highlight">904 Carrera GTS</span> · 904/6 · 904/8<br>Première 911 au Mans (1966)</div>
+      </div>
+      <div class="plateau-card">
+        <div class="plateau-num">Plateau 6</div>
+        <div class="plateau-years">1966 — 1971</div>
+        <div class="plateau-cars"><span class="highlight">906 Carrera 6 · 908 · 910 · 917K</span><br>Ère la plus légendaire de Porsche au Mans</div>
+      </div>
+      <div class="plateau-card">
+        <div class="plateau-num">Plateau 7</div>
+        <div class="plateau-years">1972 — 1981</div>
+        <div class="plateau-cars"><span class="highlight">911 RSR · 935 · 936</span> · 934 · 908/03<br>Turbo Porsche domination</div>
+      </div>
+      <div class="plateau-card">
+        <div class="plateau-num">Plateau 8</div>
+        <div class="plateau-years">1982 — 1991</div>
+        <div class="plateau-cars"><span class="highlight">956 · 962C · 961 (4×4)</span><br>6 victoires consécutives 1982–1987</div>
+      </div>
+      <div class="plateau-card">
+        <div class="plateau-num">Grid X · Spirit of Le Mans</div>
+        <div class="plateau-years">Invitations spéciales</div>
+        <div class="plateau-cars"><span class="highlight">917K · 956 · 919 Hybrid Evo</span><br>Démonstrations et courses d'honneur</div>
+      </div>
+    </div>
+
+  </section>
+
+
+  <script>
+    /* ── TAB SWITCHING ── */
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        document.getElementById('tab-models').classList.toggle('hidden', tab !== 'models');
+        document.getElementById('tab-colors').classList.toggle('hidden', tab !== 'colors');
+        document.getElementById('tab-lemans24').classList.toggle('hidden', tab !== 'lemans24');
+        document.getElementById('tab-lemansc').classList.toggle('hidden', tab !== 'lemansc');
+        // Hide search bar for Le Mans tabs
+        document.querySelector('.cat-hero .search-wrap').style.display =
+          (tab === 'lemans24' || tab === 'lemansc') ? 'none' : '';
+        updateCounts();
+        applySearch();
+      });
+    });
+
+    /* ── FILTERS ── */
+    function bindFilters(rowId, gridId) {
+      const row = document.getElementById(rowId);
+      if (!row) return;
+      row.querySelectorAll('.chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          row.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          currentFilters[rowId] = chip.dataset.filter;
+          applySearch();
+        });
+      });
+    }
+
+    const currentFilters = {
+      'models-filters': 'all',
+      'colors-filters': 'all'
+    };
+
+    bindFilters('models-filters', 'models-grid');
+    bindFilters('colors-filters', 'colors-grid');
+
+    /* ── SEARCH ── */
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', applySearch);
+
+    function applySearch() {
+      const q = searchInput.value.toLowerCase().trim();
+      filterGrid('models-grid', 'models-filters', 'data-family', 'models-no-results', q);
+      filterGrid('colors-grid', 'colors-filters', 'data-type', 'colors-no-results', q);
+      updateCounts();
+    }
+
+    function filterGrid(gridId, filterId, attr, noResultsId, q) {
+      const grid = document.getElementById(gridId);
+      const filter = currentFilters[filterId] || 'all';
+      const cards = grid.querySelectorAll('[' + attr + ']');
+      let visible = 0;
+
+      cards.forEach(card => {
+        const matchFilter = filter === 'all' || card.getAttribute(attr) === filter;
+        const searchText = (card.dataset.search || '') + ' ' + card.textContent;
+        const matchSearch = !q || searchText.toLowerCase().includes(q);
+        const show = matchFilter && matchSearch;
+        card.classList.toggle('hidden-card', !show);
+        if (show) visible++;
+      });
+
+      const noResults = document.getElementById(noResultsId);
+      if (noResults) noResults.classList.toggle('visible', visible === 0);
+    }
+
+    function updateCounts() {
+      const mc = document.querySelectorAll('#models-grid [data-family]:not(.hidden-card)').length;
+      const cc = document.querySelectorAll('#colors-grid [data-type]:not(.hidden-card)').length;
+      const mEl = document.getElementById('models-count');
+      const cEl = document.getElementById('colors-count');
+      if (mEl) mEl.textContent = mc > 0 ? mc : '';
+      if (cEl) cEl.textContent = cc > 0 ? cc : '';
+    }
+
+    /* init counts */
+    updateCounts();
+  </script>
+
+</body>
+</html>

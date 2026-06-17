@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Camino 2026 🐚</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --primary: #8B6022;
+      --primary-dark: #5C3D0C;
+      --secondary: #4E7A42;
+      --accent: #C44E2A;
+      --bg: #FBF8F2;
+      --card: #FFFFFF;
+      --text: #2C1A08;
+      --muted: #7A6045;
+      --border: #E0CEAD;
+      --shadow-sm: 0 2px 10px rgba(0,0,0,.06);
+      --shadow-md: 0 6px 24px rgba(0,0,0,.10);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,.14);
+      --radius: 16px;
+      --transition: .22s cubic-bezier(.4,0,.2,1);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, 'Segoe UI', Helvetica, sans-serif; background: var(--bg); color: var(--text); }
+
+    /* ─── HEADER ─── */
+    .header {
+      background: linear-gradient(135deg, #3A1E06 0%, #7A4E14 45%, #C47A28 100%);
+      color: #fff;
+      padding: 1.5rem 2rem 1.25rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,.25);
+    }
+    .header-inner {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+    }
+    .shell-logo {
+      font-size: 2.8rem;
+      line-height: 1;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.4));
+      animation: bob 3s ease-in-out infinite;
+    }
+    @keyframes bob {
+      0%,100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-4px) rotate(5deg); }
+    }
+    .header-title h1 { font-size: 1.9rem; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
+    .header-title p  { font-size: .82rem; opacity: .82; margin-top: .2rem; letter-spacing: .5px; }
+    .header-stats { margin-left: auto; display: flex; gap: 2rem; }
+    .stat { text-align: center; }
+    .stat .v { font-size: 1.5rem; font-weight: 700; }
+    .stat .l { font-size: .65rem; opacity: .75; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* ─── PROGRESS BAR ─── */
+    .progress-bar-wrap {
+      background: rgba(0,0,0,.25);
+      height: 4px;
+      margin-top: .75rem;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #FFD080, #FFFFFF);
+      border-radius: 4px;
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+    }
+    .progress-label {
+      font-size: .68rem;
+      opacity: .8;
+      margin-top: .25rem;
+      letter-spacing: .5px;
+    }
+
+    /* ─── SHUTTLE ─── */
+    .shuttle {
+      background: linear-gradient(90deg, #0F2B4A, #1A4A7C);
+      color: #fff;
+      padding: .7rem 2rem;
+      font-size: .85rem;
+      text-align: center;
+    }
+    .shuttle strong { background: rgba(255,255,255,.15); padding: .1rem .5rem; border-radius: 4px; margin: 0 .2rem; }
+
+    /* ─── TABS (mobile) ─── */
+    .tabs {
+      display: none;
+      background: #fff;
+      border-bottom: 2px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+    .tabs button {
+      flex: 1;
+      padding: .85rem .5rem;
+      border: none;
+      background: none;
+      font-size: .85rem;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+    }
+    .tabs button.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+
+    /* ─── LAYOUT ─── */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      max-width: 1400px;
+      margin: 0 auto;
+      min-height: calc(100vh - 200px);
+    }
+    .left { padding: 1.5rem 1.5rem 2rem; overflow-y: auto; }
+    .right { position: sticky; top: 0; height: 100vh; border-left: 1px solid var(--border); }
+    #map { height: 100%; width: 100%; }
+
+    /* ─── STAGE STEPPER ─── */
+    .stepper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .75rem 0 1.25rem;
+      gap: .3rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .stepper::-webkit-scrollbar { display: none; }
+    .step-dot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .3rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform var(--transition);
+    }
+    .step-dot:hover { transform: translateY(-2px); }
+    .step-dot .dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 2.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem;
+      background: var(--card);
+      transition: all var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+    .step-dot.active .dot {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+      transform: scale(1.2);
+      box-shadow: 0 0 0 4px rgba(196,78,42,.2);
+    }
+    .step-dot .step-name { font-size: .62rem; color: var(--muted); font-weight: 500; white-space: nowrap; }
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: repeating-linear-gradient(90deg,var(--border) 0,var(--border) 6px,transparent 6px,transparent 12px);
+      min-width: 16px;
+    }
+
+    /* ─── STAGE CARD ─── */
+    .stage-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      margin-bottom: .75rem;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition);
+      cursor: pointer;
+    }
+    .stage-card:hover  { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--primary); }
+    .stage-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 4px 24px rgba(196,78,42,.18);
+    }
+    .stage-card.active .card-top {
+      background: linear-gradient(135deg, rgba(196,78,42,.06) 0%, transparent 100%);
+    }
+
+    .card-top {
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: background var(--transition);
+    }
+    .badge {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    }
+    .card-title h3 { font-size: 1.15rem; font-weight: 700; }
+    .card-title .sub { font-size: .78rem; color: var(--muted); margin-top: .15rem; }
+    .card-distance { margin-left: auto; text-align: right; }
+    .card-distance .km { font-size: 1.5rem; font-weight: 800; color: var(--primary); line-height: 1; }
+    .card-distance .kml { font-size: .65rem; color: var(--muted); text-transform: uppercase; }
+
+    .card-date {
+      font-size: .72rem;
+      color: var(--muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .2rem .6rem;
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      margin: 0 1.25rem .75rem;
+    }
+
+    /* ─── CARD BODY (animated) ─── */
+    .card-body-wrap {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows .3s cubic-bezier(.4,0,.2,1);
+    }
+    .card-body-wrap.open { grid-template-rows: 1fr; }
+    .card-body-inner { overflow: hidden; }
+
+    .card-body { border-top: 1px solid var(--border); padding: .75rem 1.25rem 1rem; }
+
+    .row {
+      display: flex;
+      gap: .75rem;
+      padding: .55rem 0;
+      border-bottom: 1px solid #F5EDE0;
+      font-size: .88rem;
+      align-items: flex-start;
+    }
+    .row:last-child { border-bottom: none; }
+    .row-icon { width: 22px; text-align: center; flex-shrink: 0; margin-top: .05rem; font-size: 1rem; }
+    .row-content .rl { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .row-content .rv { font-weight: 500; margin-top: .1rem; }
+
+    /* ─── ELEVATION BAR ─── */
+    .elevation-mini {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 32px;
+      margin: .5rem 0 .25rem;
+    }
+    .elev-bar {
+      flex: 1;
+      background: linear-gradient(to top, #C47A28, #E8B870);
+      border-radius: 2px 2px 0 0;
+      opacity: .65;
+      transition: opacity var(--transition);
+    }
+    .elev-bar:hover { opacity: 1; }
+    .elev-label {
+      font-size: .68rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: .25rem;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .75rem; }
+    .tag {
+      font-size: .73rem;
+      padding: .2rem .65rem;
+      border-radius: 20px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .tag.blue { background: #E8F2FF; border-color: #90BFF0; color: #1A4A80; }
+    .tag.green { background: #E8F8E8; border-color: #90D090; color: #1A5A1A; }
+    .tag.orange { background: #FFF2E8; border-color: #F0B08A; color: #7A3010; }
+
+    /* ─── WALK CONNECTOR ─── */
+    .walk {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .3rem 1.25rem;
+      color: var(--muted);
+      font-size: .78rem;
+      margin-bottom: .25rem;
+    }
+    .walk-line { flex: 1; height: 2px; background: repeating-linear-gradient(90deg,var(--border) 0,var(--border) 8px,transparent 8px,transparent 16px); }
+
+    /* ─── MAP CONTROLS ─── */
+    .map-controls {
+      position: absolute;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 500;
+      display: flex;
+      gap: .5rem;
+    }
+    .map-btn {
+      background: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: .55rem .9rem;
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--primary-dark);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,.18);
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+    }
+    .map-btn:hover { background: var(--primary); color: #fff; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.22); }
+
+    /* ─── CHECKLIST SECTION ─── */
+    .section-title {
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      font-weight: 600;
+      margin: 1.5rem 0 .75rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .checklist { display: grid; grid-template-columns: repeat(2, 1fr); gap: .4rem; }
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .45rem .7rem;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: .82rem;
+      cursor: pointer;
+      transition: all var(--transition);
+      user-select: none;
+    }
+    .check-item:hover { border-color: var(--primary); background: #FFF8EE; }
+    .check-item.checked { background: #E8F8E8; border-color: #90D090; color: #1A5A1A; }
+    .check-item .ci { font-size: 1rem; flex-shrink: 0; }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(0);
+      background: #2C1A08;
+      color: #fff;
+      padding: .65rem 1.25rem;
+      border-radius: 10px;
+      font-size: .85rem;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity .3s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ─── MAP POPUP ─── */
+    .leaflet-popup-content-wrapper { border-radius: 12px !important; border: none !important; box-shadow: 0 8px 30px rgba(0,0,0,.15) !important; }
+    .popup h4 { font-size: .95rem; font-weight: 700; margin-bottom: .3rem; }
+    .popup p  { font-size: .8rem; color: #555; margin: .1rem 0; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 820px) {
+      .header { position: relative; }
+      .header-stats { margin: 0; width: 100%; justify-content: space-around; }
+      .tabs { display: flex; }
+      .layout { grid-template-columns: 1fr; }
+      .right { position: static; height: 55vh; border-left: none; border-top: 1px solid var(--border); display: none; }
+      .right.visible { display: block; }
+      .left.hidden { display: none; }
+      .checklist { grid-template-columns: 1fr; }
+    }
+
+    /* ─── SKELETON LOADER ─── */
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="shell-logo">🐚</div>
+    <div class="header-title">
+      <h1>Camino 2026</h1>
+      <p>Via Podiensis · GR65 · Conques → Cajarc · Été 2026</p>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="progress-label" id="progress-label">0 / 82 km parcourus</div>
+    </div>
+    <div class="header-stats">
+      <div class="stat"><div class="v" id="stat-stages">6</div><div class="l">Étapes</div></div>
+      <div class="stat"><div class="v">82 km</div><div class="l">Distance</div></div>
+      <div class="stat"><div class="v">5</div><div class="l">Nuits</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- SHUTTLE BANNER -->
+<div class="shuttle">
+  🚐 <strong>Navette Cajarc → Conques</strong> le <strong>3 août</strong> — Départ <strong>13h45</strong> (Mairie de Cajarc) · Arrivée <strong>~15h30</strong> à Conques &nbsp;·&nbsp; 📦 Malle postale assurée chaque étape
+</div>
+
+<!-- MOBILE TABS -->
+<div class="tabs">
+  <button class="active" onclick="switchTab('stages')">📍 Étapes</button>
+  <button onclick="switchTab('map')">🗺️ Carte</button>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT: STAGE CARDS -->
+  <div class="left" id="panel-stages">
+
+    <!-- STEPPER -->
+    <div class="stepper" id="stepper"></div>
+
+    <!-- STAGE 0 — CONQUES (Départ) -->
+    <div class="stage-card active" id="card-0" onclick="selectStage(0)">
+      <div class="card-top">
+        <div class="badge" style="background:#B07520;">🏰</div>
+        <div class="card-title">
+          <h3>Conques <span style="font-size:.75rem;font-weight:400;color:#B07520;margin-left:.3rem;">DÉPART</span></h3>
+          <div class="sub">Moulin de Cambelong · Hôtel de charme</div>
+        </div>
+      </div>
+      <div class="card-date">📅 3 août — Arrivée navette ~15h30</div>
+      <div class="card-body-wrap open" id="wrap-0">
+        <div class="card-body-inner">
+          <div class="card-body">
+            <div class="row">
+              <div class="row-icon">🏨</div>
+              <div class="row-content">
+                <div class="rl">Hébergement</div>
+                <div class="rv">Moulin de Cambelong</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-icon">🍽️</div>
+              <div class="row-content">
+                <div class="rl">Dîner</div>
+                <div class="rv">Bistrot de l'hôtel à 20h · Réservation incluse</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-icon">💡</div>
+              <div class="row-content">
+                <div class="rl">Note</div>
+                <div class="rv">Arrivée en navette depuis Cajarc</div>
+              </div>
+            </div>
+            <div class="tags">
+              <span class="tag green">☕ Petit-déjeuner inclus</span>
+              <span class="tag orange">🍷 Dîner au bistrot 20h</span>
+              <span class="tag blue">🚐 Navette 3 août</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WALK 0→1 -->
+    <div class="walk">
+      <div class="walk-line"></div>
+      🚶 18 km · ~5h de marche
+      <div class="walk-line"></div>
+    </div>
+
+    <!-- STAGE 1 — DECAZEVILLE -->
+    <div class="stage-card" id="card-1" onclick="selectStage(1)">
+      <div class="card-top">
+        <div class="badge" style="background:#4A7A38;">1</div>
+        <div class="card-title">
+          <h3>Decazeville</h3>
+          <div class="sub">Gîte des Volets Bleus · Gîte d'étape</div>
+        </div>
+        <div class="card-distance"><div class="km">18</div><div class="kml">km</div></div>
+      </div>
+      <div class="card-date">📅 4 août</div>
+      <div class="card-body-wrap" id="wrap-1">
+        <div class="card-body-inner">
+          <div class="card-body">
+            <div class="row">
+              <div class="row-icon">🏠</div>
+              <div class="row-content">
+                <div class="rl">Hébergement</div>
+                <div class="rv">Gîte des Volets Bleus</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-icon">🍽️</div>
+              <div class="row-content">
+                <div class="rl">Repas</div>
+                <div class="rv">Dîner inclus dans la demi-pension</div>
+              </div>
+            </div>
+            <div class="tags">
+              <span class="tag green">🍽️ Demi-pension incluse</span>
+              <span class="tag">😂 On change de catégorie !</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WALK 1→2 -->
+    <div class="walk">
+      <div class="walk-line"></div>
+      🚶 16,7 km · ~4h30 de marche
+      <div class="walk-line"></div>
+    </div>
+
+    <!-- STAGE 2 — LE TERLY -->
+    <div class="stage-card" id="card-2" onclick="selectStage(2)">
+      <div class="card-top">
+        <div class="badge" style="background:#3A7A6A;">2</div>
+        <div class="card-title">
+          <h3>Le Terly</h3>
+          <div class="sub">Le Fournil du Terly · Gîte d'étape</div>
+        </div>
+        <div class="card-distance"><div class="km">16,7</div><div class="kml">km</div></div>
+      </div>
+      <div class="card-date">📅 5 août</div>
+      <div class="card-body-wrap" id="wrap-2">
+        <div class="card-body-inner">
+          <div class="card-body">
+            <div class="row">
+              <div class="row-icon">🌾</div>
+              <div class="row-content">
+                <div class="rl">Hébergement</div>
+                <div class="rv">Le Fournil du Terly</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-icon">🍽️</div>
+              <div class="row-content">
+                <div class="rl">Repas</div>
+                <div class="rv">Dîner inclus dans la demi-pension</div>
+              </div>
+            </div>
+            <div class="tags">
+              <span class="tag green">🍽️ Demi-pension incluse</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WALK 2→3 -->
+    <div class="walk">
+      <div class="walk-line"></div>
+      🚶 12,7 km · ~3h30 de marche
+      <div class="walk-line"></div>
+    </div>
+
+    <!-- STAGE 3 — FIGEAC -->
+    <div class="stage-card" id="card-3" onclick="selectStage(3)">
+      <div class="card-top">
+        <div class="badge" style="background:#3A5A9A;">3</div>
+        <div class="card-title">
+          <h3>Figeac</h3>
+          <div class="sub">Chambres d'hôtes des Pratges · 🏊 Piscine</div>
+        </div>
+        <div class="card-distance"><div class="km">12,7</div><div class="kml">km</div></div>
+      </div>
+      <div class="card-date">📅 6 août</div>
+      <div class="card-body-wrap" id="wrap-3">
+        <div class="card-body-inner">
+          <div class="card-body">
+            <div class="row">
+              <div class="row-icon">🏡</div>
+              <div class="row-content">
+                <div class="rl">Hébergement</div>
+                <div class="rv">Chambres d'hôtes des Pratges</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-icon">🍽️</div>
+              <div class="row-content">
+                <div class="rl">Repas</div>
+                <div class="rv">Dîner inclus dans la demi-pension</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-icon">🏊</div>
+              <div class="row-content">
+                <div class="rl">Équipements</div>
+                <div class="rv">Piscine disponible — Méritée après 3 étapes !</div>
+              </div>
+            </div>
+            <div class="tags">
+              <span class="tag green">🍽️ Demi-pension incluse</span>
+              <span class="tag blue">🏊 Piscine</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WALK 3→4 -->
+    <div class="walk">
+      <div class="walk-line"></div>
+      🚶 25 km · ~7h de marche · <strong>Étape la plus longue !</strong>
+      <div class="walk-line"></div>
+    </div>
+
+    <!-- STAGE 4 — USSAC -->
+    <div class="stage-card" id="card-4" onclick="selectStage(4)">
+      <div class="card-top">
+        <div class="badge" style="background:#7A4A9A;">4</div>
+        <div class="card-title">
+          <h3>Ussac</h3>
+          <div class="sub">Gîte La Source d'Ussac · Gîte d'étape</div>
+        </div>
+        <div class="card-distance"><div class="km">25</div><div class="kml">km</div></div>
+      </div>
+      <div class="card-date">📅 7 août</div>
+      <div class="card-body-wrap" id="wrap-4">
+        <div class="card-body-inner">
+          <div class="card-body">
+            <div class="row">
+              <div class="row-icon">⛺</div>
+              <div class="row-content">
+                <div class="rl">Hébergement</div>
+                <div class="rv">Gîte La Source d'Ussac</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-icon">🍽️</div>
+              <div class="row-content">
+                <div class="rl">Repas</div>
+                <div class="rv">Dîner inclus dans la demi-pension</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-icon">⚠️</div>
+              <div class="row-content">
+                <div class="rl">Attention</div>
+                <div class="rv">Étape la plus longue du parcours — Couper si besoin</div>
+              </div>
+            </div>
+            <div class="tags">
+              <span class="tag green">🍽️ Demi-pension incluse</span>
+              <span class="tag orange">⚠️ 25 km · Journée chargée</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WALK 4→5 -->
+    <div class="walk">
+      <div class="walk-line"></div>
+      🚶 10 km · ~3h de marche · Dernière étape !
+      <div class="walk-line"></div>
+    </div>
+
+    <!-- STAGE 5 — CAJARC (Arrivée) -->
+    <div class="stage-card" id="card-5" onclick="selectStage(5)">
+      <div class="card-top">
+        <div class="badge" style="background:#C4522D;">🎯</div>
+        <div class="card-title">
+          <h3>Cajarc <span style="font-size:.75rem;font-weight:400;color:#C4522D;margin-left:.3rem;">ARRIVÉE</span></h3>
+          <div class="sub">Hôtel La Séglière · 🏊 Piscine</div>
+        </div>
+        <div class="card-distance"><div class="km">10</div><div class="kml">km</div></div>
+      </div>
+      <div class="card-date">📅 8 août — ARRIVÉE !</div>
+      <div class="card-body-wrap" id="wrap-5">
+        <div class="card-body-inner">
+          <div class="card-body">
+            <div class="row">
+              <div class="row-icon">🏨</div>
+              <div class="row-content">
+                <div class="rl">Hébergement</div>
+                <div class="rv">Hôtel La Séglière</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-icon">🍽️</div>
+              <div class="row-content">
+                <div class="rl">Dîner</div>
+                <div class="rv">À organiser séparément · Célébration méritée !</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="row-icon">🏊</div>
+              <div class="row-content">
+                <div class="rl">Équipements</div>
+                <div class="rv">Piscine — La récompense finale !</div>
+              </div>
+            </div>
+            <div class="tags">
+              <span class="tag green">☕ Petit-déjeuner inclus</span>
+              <span class="tag blue">🏊 Piscine</span>
+              <span class="tag orange">🍽️ Dîner à prévoir</span>
+              <span class="tag">🎉 Fin du Camino !</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PACKING CHECKLIST -->
+    <div class="section-title">🎒 Sac à dos · Checklist essentielle</div>
+    <div class="checklist" id="checklist">
+      <div class="check-item" onclick="toggleCheck(this)"><span class="ci">👟</span>Chaussures de rando</div>
+      <div class="check-item" onclick="toggleCheck(this)"><span class="ci">🧦</span>Chaussettes anti-ampoules</div>
+      <div class="check-item" onclick="toggleCheck(this)"><span class="ci">🩹</span>Kit ampoules (Compeed)</div>
+      <div class="check-item" onclick="toggleCheck(this)"><span class="ci">☀️</span>Crème solaire SPF 50+</div>
+      <div class="check-item" onclick="toggleCheck(this)"><span class="ci">🧴</span>Anti-douleur / Ibuprofène</div>
+      <div class="check-item" onclick="toggleCheck(this)"><span class="ci">🎒</span>Sac de 10–12 kg max</div>
+      <div class="check-item" onclick="toggleCheck(this)"><span class="ci">💧</span>Gourde 1L minimum</div>
+      <div class="check-item" onclick="toggleCheck(this)"><span class="ci">🗺️</span>Carte / Application offline</div>
+      <div class="check-item" onclick="toggleCheck(this)"><span class="ci">🐚</span>Crédential (passeport Camino)</div>
+      <div class="check-item" onclick="toggleCheck(this)"><span class="ci">🧢</span>Chapeau / casquette</div>
+      <div class="check-item" onclick="toggleCheck(this)"><span class="ci">🔦</span>Frontale + batterie externe</div>
+      <div class="check-item" onclick="toggleCheck(this)"><span class="ci">👕</span>2 tenues légères</div>
+    </div>
+
+  </div><!-- /left -->
+
+  <!-- RIGHT: MAP -->
+  <div class="right" id="panel-map">
+    <div id="map" style="position:relative;">
+      <div class="map-controls">
+        <button class="map-btn" onclick="fitAll()">🗺️ Vue globale</button>
+        <button class="map-btn" onclick="zoomActive()">📍 Étape active</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /layout -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ─── DATA ───────────────────────────────────────────────────────────────────
+  const STAGES = [
+    { id:0, name:'Conques',     coords:[44.5997, 2.3978], color:'#B07520', icon:'🏰', accom:'Moulin de Cambelong',           km:0,    elev:[420,380,350,370,380] },
+    { id:1, name:'Decazeville', coords:[44.5599, 2.2584], color:'#4A7A38', icon:'🏠', accom:'Gîte des Volets Bleus',         km:18,   elev:[370,340,320,290,280] },
+    { id:2, name:'Le Terly',    coords:[44.5100, 2.1350], color:'#3A7A6A', icon:'🌾', accom:'Le Fournil du Terly',           km:34.7, elev:[280,300,320,310,295] },
+    { id:3, name:'Figeac',      coords:[44.6088, 2.0345], color:'#3A5A9A', icon:'🏡', accom:"Ch. d'hôtes des Pratges 🏊",   km:47.4, elev:[200,220,240,210,199] },
+    { id:4, name:'Ussac',       coords:[44.5200, 1.9050], color:'#7A4A9A', icon:'⛺', accom:"Gîte La Source d'Ussac",       km:72.4, elev:[320,350,380,360,340] },
+    { id:5, name:'Cajarc',      coords:[44.4841, 1.8395], color:'#C4522D', icon:'🎯', accom:'Hôtel La Séglière 🏊',         km:82,   elev:[340,310,280,260,150] },
+  ];
+
+  const TOTAL_KM = 82;
+
+  const ROUTE = [
+    [44.5997, 2.3978],[44.5870, 2.3580],[44.5720, 2.3100],[44.5640, 2.2780],[44.5599, 2.2584],
+    [44.5520, 2.2300],[44.5380, 2.2050],[44.5230, 2.1720],[44.5100, 2.1350],[44.5050, 2.1100],
+    [44.5200, 2.0800],[44.5500, 2.0600],[44.5800, 2.0450],[44.6088, 2.0345],[44.5950, 1.9900],
+    [44.5700, 1.9600],[44.5400, 1.9350],[44.5200, 1.9050],[44.5080, 1.8850],[44.4970, 1.8700],
+    [44.4870, 1.8530],[44.4841, 1.8395],
+  ];
+
+  let map, markers = [], activeStage = 0;
+  const PROGRESS_KEY = 'camino2026_progress';
+
+  // ─── STEPPER ─────────────────────────────────────────────────────────────────
+  function buildStepper() {
+    const wrap = document.getElementById('stepper');
+    wrap.innerHTML = '';
+    STAGES.forEach((s, i) => {
+      if (i > 0) {
+        const line = document.createElement('div');
+        line.className = 'step-line';
+        wrap.appendChild(line);
+      }
+      const dot = document.createElement('div');
+      dot.className = 'step-dot' + (i === activeStage ? ' active' : '');
+      dot.innerHTML = `<div class="dot">${s.icon}</div><div class="step-name">${s.name.split(' ')[0]}</div>`;
+      dot.onclick = () => selectStage(i);
+      wrap.appendChild(dot);
+    });
+  }
+
+  // ─── PROGRESS ────────────────────────────────────────────────────────────────
+  function updateProgress(stageId) {
+    const kmDone = STAGES[stageId].km;
+    const pct = (kmDone / TOTAL_KM * 100).toFixed(1);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = `${kmDone} / ${TOTAL_KM} km parcourus`;
+    localStorage.setItem(PROGRESS_KEY, stageId);
+  }
+
+  // ─── MAP INIT ────────────────────────────────────────────────────────────────
+  function initMap() {
+    map = L.map('map', { zoomControl: true }).setView([44.55, 2.10], 9);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 18
+    }).addTo(map);
+
+    // Route polyline with glow effect
+    L.polyline(ROUTE, { color: 'rgba(232,144,26,.2)', weight: 10, opacity: 1 }).addTo(map);
+    L.polyline(ROUTE, { color: '#E8901A', weight: 4, opacity: .9, lineJoin: 'round' }).addTo(map);
+
+    // Markers
+    STAGES.forEach(s => {
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="
+          width:36px;height:36px;
+          background:${s.color};
+          border:3px solid #fff;
+          border-radius:50%;
+          display:flex;align-items:center;justify-content:center;
+          font-size:1rem;
+          box-shadow:0 2px 10px rgba(0,0,0,.4);
+          cursor:pointer;
+          transition:transform .2s;
+        " onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">${s.icon}</div>`,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+        popupAnchor: [0, -22]
+      });
+
+      const marker = L.marker(s.coords, { icon })
+        .addTo(map)
+        .bindPopup(`<div class="popup"><h4>${s.icon} ${s.name}</h4><p>🏠 ${s.accom}</p><p>📍 ${s.km} km parcourus</p></div>`);
+
+      marker.on('click', () => selectStage(s.id));
+      markers.push(marker);
+    });
+
+    fitAll();
+  }
+
+  function fitAll() {
+    map.fitBounds(ROUTE, { padding: [40, 40] });
+  }
+
+  function zoomActive() {
+    if (map && STAGES[activeStage]) {
+      map.flyTo(STAGES[activeStage].coords, 13, { animate: true, duration: .8 });
+      markers[activeStage].openPopup();
+    }
+  }
+
+  // ─── STAGE SELECTION ─────────────────────────────────────────────────────────
+  function selectStage(id) {
+    // Update cards
+    document.querySelectorAll('.stage-card').forEach((c, i) => {
+      c.classList.toggle('active', i === id);
+    });
+
+    // Animate card body open/close
+    const prevWrap = document.getElementById(`wrap-${activeStage}`);
+    const nextWrap = document.getElementById(`wrap-${id}`);
+    if (activeStage !== id && prevWrap) prevWrap.classList.remove('open');
+    if (nextWrap) {
+      if (activeStage === id) {
+        nextWrap.classList.toggle('open');
+      } else {
+        nextWrap.classList.add('open');
+      }
+    }
+
+    // Scroll card into view (smooth)
+    const card = document.getElementById(`card-${id}`);
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Fly map
+    if (map) {
+      map.flyTo(STAGES[id].coords, 12, { animate: true, duration: .8 });
+      setTimeout(() => markers[id].openPopup(), 500);
+    }
+
+    activeStage = id;
+    buildStepper();
+    updateProgress(id);
+  }
+
+  // ─── CHECKLIST ───────────────────────────────────────────────────────────────
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    const checked = el.classList.contains('checked');
+    if (checked) {
+      el.style.transform = 'scale(.97)';
+      setTimeout(() => el.style.transform = '', 150);
+      showToast('✅ ' + el.textContent.trim());
+    }
+    saveChecklist();
+  }
+
+  function saveChecklist() {
+    const items = [...document.querySelectorAll('.check-item')];
+    const state = items.map(el => el.classList.contains('checked'));
+    localStorage.setItem('camino2026_checklist', JSON.stringify(state));
+  }
+
+  function loadChecklist() {
+    const saved = localStorage.getItem('camino2026_checklist');
+    if (!saved) return;
+    const state = JSON.parse(saved);
+    const items = [...document.querySelectorAll('.check-item')];
+    items.forEach((el, i) => { if (state[i]) el.classList.add('checked'); });
+  }
+
+  // ─── TOAST ───────────────────────────────────────────────────────────────────
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  // ─── MOBILE TABS ─────────────────────────────────────────────────────────────
+  function switchTab(tab) {
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.tabs button[onclick="switchTab('${tab}')"]`).classList.add('active');
+
+    const stagesPanel = document.getElementById('panel-stages');
+    const mapPanel    = document.getElementById('panel-map');
+
+    stagesPanel.classList.remove('hidden');
+    mapPanel.classList.remove('visible');
+
+    if (tab === 'map') {
+      stagesPanel.classList.add('hidden');
+      mapPanel.classList.add('visible');
+      if (map) { setTimeout(() => { map.invalidateSize(); fitAll(); }, 50); }
+    }
+  }
+
+  // ─── BOOT ─────────────────────────────────────────────────────────────────────
+  window.addEventListener('load', () => {
+    buildStepper();
+    initMap();
+
+    // Restore progress
+    const saved = localStorage.getItem(PROGRESS_KEY);
+    if (saved !== null) {
+      const id = parseInt(saved);
+      updateProgress(id);
+    } else {
+      updateProgress(0);
+    }
+
+    loadChecklist();
+  });
+</script>
+
+</body>
+</html>

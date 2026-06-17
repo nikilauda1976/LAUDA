@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Le Mans Classique 2026 — Garage Privé</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+
+  <style>
+    body { background: #06060e; }
+
+    /* ─── HERO ─── */
+    .lmc-hero {
+      min-height: 38vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: calc(var(--nav-h) + 3rem) var(--section-pad-x) 2.5rem;
+      text-align: center;
+      background: radial-gradient(ellipse 80% 70% at 50% 0%, #18080a 0%, #06060e 65%);
+      position: relative; overflow: hidden;
+    }
+    .lmc-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,.02) 1px, transparent 1px);
+      background-size: 36px 36px; pointer-events: none;
+    }
+    .lmc-eyebrow {
+      font-size: .6875rem; font-weight: 700; letter-spacing: .22em;
+      text-transform: uppercase; color: rgba(255,255,255,.35);
+      margin-bottom: .75rem;
+    }
+    .lmc-title {
+      font-size: clamp(2.5rem, 7vw, 5rem); font-weight: 900;
+      letter-spacing: -.05em; line-height: .95;
+      background: linear-gradient(150deg, #fff 0%, rgba(255,200,180,.7) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: .6rem;
+    }
+    .lmc-subtitle {
+      font-size: 1rem; font-weight: 400; letter-spacing: .04em;
+      color: rgba(255,255,255,.45); margin-bottom: 1.5rem;
+    }
+    .lmc-date-badge {
+      display: inline-flex; align-items: center; gap: .6rem;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 100px; padding: .45rem 1.25rem;
+      font-size: .75rem; font-weight: 600; letter-spacing: .08em;
+      color: rgba(255,255,255,.6); text-transform: uppercase;
+    }
+    .lmc-date-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #ff6b35; box-shadow: 0 0 8px #ff6b35; flex-shrink:0; }
+
+    /* ─── PAGE NAV ─── */
+    .page-nav {
+      display: flex; justify-content: center; gap: .35rem;
+      padding: 1.25rem var(--section-pad-x);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      position: sticky; top: var(--nav-h); z-index: 50;
+      background: rgba(6,6,14,.85);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    }
+    .page-nav-btn {
+      padding: .45rem 1.1rem; border-radius: 8px;
+      font-size: .8125rem; font-weight: 600; letter-spacing: .02em;
+      color: rgba(255,255,255,.45); background: transparent;
+      border: none; cursor: pointer; transition: all .2s;
+    }
+    .page-nav-btn.active, .page-nav-btn:hover {
+      color: rgba(255,255,255,.9);
+      background: rgba(255,255,255,.07);
+    }
+
+    /* ─── SECTION LAYOUT ─── */
+    .lmc-section {
+      max-width: 1360px; margin: 0 auto;
+      padding: 3.5rem var(--section-pad-x) 5rem;
+    }
+    .lmc-section.hidden { display: none; }
+
+    .section-title {
+      font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800;
+      letter-spacing: -.03em; color: var(--text-primary);
+      margin-bottom: .5rem;
+    }
+    .section-desc {
+      font-size: .875rem; color: var(--text-muted); line-height: 1.6;
+      margin-bottom: 2.5rem; max-width: 640px;
+    }
+
+    /* ════════════════════════════════
+       CIRCUIT SECTION
+       ════════════════════════════════ */
+    .circuit-layout {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 3rem; align-items: start;
+    }
+
+    /* Circuit SVG container */
+    .circuit-svg-wrap {
+      background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px; padding: 2rem; position: relative;
+    }
+    .circuit-svg-wrap svg { width: 100%; height: auto; display: block; }
+
+    /* Circuit stats */
+    .circuit-stats { display: flex; flex-direction: column; gap: 1px; }
+    .circuit-stat-group {
+      background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px; overflow: hidden;
+    }
+    .csg-label {
+      font-size: .5625rem; font-weight: 700; letter-spacing: .18em;
+      text-transform: uppercase; color: rgba(255,255,255,.3);
+      padding: .75rem 1.25rem .25rem; display: block;
+    }
+    .csg-value {
+      font-size: 2rem; font-weight: 800; letter-spacing: -.04em;
+      color: var(--text-primary); padding: 0 1.25rem .9rem; display: block;
+      line-height: 1;
+    }
+    .csg-sub {
+      font-size: .6875rem; color: rgba(255,255,255,.35);
+      padding: 0 1.25rem .75rem; display: block;
+    }
+
+    .stat-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; margin-bottom: 1px;
+    }
+
+    .circuit-sections {
+      margin-top: 1.5rem;
+      background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px; overflow: hidden;
+    }
+    .cs-item {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .7rem 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .cs-item:last-child { border-bottom: none; }
+    .cs-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .cs-name { font-size: .8125rem; font-weight: 600; color: var(--text-primary); flex: 1; }
+    .cs-km { font-size: .75rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+    /* ════════════════════════════════
+       PLATEAUX 2026
+       ════════════════════════════════ */
+    .plateau-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1px; background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px; overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    .plateau-card {
+      background: #0a0a18; padding: 1.5rem 1.75rem;
+      transition: background .2s; position: relative;
+    }
+    .plateau-card:hover { background: #0f0f22; }
+    .plateau-card.official {
+      border-top: 2px solid rgba(255,107,53,.4);
+    }
+
+    .plateau-tag {
+      font-size: .5625rem; font-weight: 800; letter-spacing: .14em;
+      text-transform: uppercase; display: inline-flex; align-items: center; gap: .35rem;
+      padding: 3px 8px; border-radius: 5px; margin-bottom: .75rem;
+    }
+    .plateau-tag.official-tag {
+      background: rgba(255,107,53,.12); border: 1px solid rgba(255,107,53,.3);
+      color: #ff6b35;
+    }
+    .plateau-tag.history-tag {
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+      color: rgba(255,255,255,.45);
+    }
+
+    .plateau-num {
+      font-size: 3rem; font-weight: 900; letter-spacing: -.06em;
+      color: var(--text-primary); line-height: 1; margin-bottom: .15rem;
+    }
+    .plateau-name {
+      font-size: .8125rem; font-weight: 700; color: rgba(255,255,255,.6);
+      margin-bottom: .6rem; letter-spacing: .01em;
+    }
+    .plateau-years {
+      font-size: .75rem; font-weight: 600; letter-spacing: .06em;
+      color: rgba(255,255,255,.35); margin-bottom: .75rem;
+    }
+    .plateau-cars {
+      font-size: .75rem; color: var(--text-muted); line-height: 1.65;
+    }
+    .plateau-cars .porsche { color: #ff6b35; font-weight: 700; }
+
+    /* ════════════════════════════════
+       RACE DASHBOARD
+       ════════════════════════════════ */
+    .dashboard-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px; overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    .dash-card {
+      background: #0a0a18; padding: 1.5rem 1.25rem; text-align: center;
+    }
+    .dash-icon { font-size: 1.5rem; margin-bottom: .5rem; }
+    .dash-value {
+      font-size: 1.875rem; font-weight: 900; letter-spacing: -.04em;
+      color: var(--text-primary); line-height: 1; margin-bottom: .25rem;
+    }
+    .dash-label {
+      font-size: .625rem; font-weight: 700; letter-spacing: .14em;
+      text-transform: uppercase; color: rgba(255,255,255,.3);
+    }
+    .dash-sub {
+      font-size: .6875rem; color: rgba(255,255,255,.25);
+      margin-top: .3rem; line-height: 1.4;
+    }
+
+    /* Timeline */
+    .race-timeline {
+      background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px; overflow: hidden;
+    }
+    .rt-header {
+      padding: 1.25rem 1.75rem; border-bottom: 1px solid rgba(255,255,255,.06);
+      font-size: .6875rem; font-weight: 700; letter-spacing: .15em;
+      text-transform: uppercase; color: rgba(255,255,255,.35);
+    }
+    .rt-item {
+      display: flex; gap: 1.25rem;
+      padding: .9rem 1.75rem; border-bottom: 1px solid rgba(255,255,255,.05);
+      align-items: flex-start;
+    }
+    .rt-item:last-child { border-bottom: none; }
+    .rt-time {
+      font-size: .6875rem; font-weight: 700; letter-spacing: .06em;
+      color: rgba(255,255,255,.3); width: 60px; flex-shrink: 0; margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .rt-event { font-size: .8125rem; font-weight: 600; color: var(--text-primary); margin-bottom: .15rem; }
+    .rt-detail { font-size: .6875rem; color: var(--text-muted); line-height: 1.4; }
+    .rt-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 5px;
+    }
+
+    /* Porsche winners highlight */
+    .winners-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1px; background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px; overflow: hidden;
+    }
+    .winner-card {
+      background: #0a0a18; padding: 1.25rem 1.5rem; transition: background .2s;
+    }
+    .winner-card:hover { background: #0f0f22; }
+    .winner-year { font-size: 1.5rem; font-weight: 900; letter-spacing: -.04em; color: #ff6b35; }
+    .winner-car { font-size: .8125rem; font-weight: 700; color: var(--text-primary); margin-bottom: .25rem; }
+    .winner-class { font-size: .625rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: rgba(255,255,255,.3); margin-bottom: .4rem; }
+    .winner-note { font-size: .6875rem; color: var(--text-muted); line-height: 1.4; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .circuit-layout { grid-template-columns: 1fr; }
+      .dashboard-grid { grid-template-columns: 1fr 1fr; }
+      .page-nav { flex-wrap: wrap; }
+    }
+    @media (max-width: 600px) {
+      .dashboard-grid { grid-template-columns: 1fr 1fr; }
+      .stat-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ NAV ═══ -->
+  <nav class="nav-glass" id="nav">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-dot"></span>
+      Collection
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#porsche-912">912 Targa</a></li>
+      <li><a href="index.html#porsche-964">964 Turbolook</a></li>
+      <li><a href="index.html#porsche-991">991 Phase 1</a></li>
+      <li><a href="index.html#bmw-x5">X5 xDrive50e</a></li>
+      <li class="nav-sep" aria-hidden="true"></li>
+      <li><a href="catalogue.html">Catalogue</a></li>
+      <li><a href="lemans-classique.html" style="color:var(--text-primary)">Le Mans Classique</a></li>
+    </ul>
+  </nav>
+
+  <!-- ═══ HERO ═══ -->
+  <header class="lmc-hero">
+    <p class="lmc-eyebrow">Circuit de la Sarthe · Le Mans, France</p>
+    <h1 class="lmc-title">Le Mans<br>Classique</h1>
+    <p class="lmc-subtitle">L'endurance dans sa version historique</p>
+    <div class="lmc-date-badge">
+      <span class="dot"></span>
+      Édition 2026 · Dates à confirmer
+    </div>
+  </header>
+
+  <!-- ═══ PAGE NAV ═══ -->
+  <nav class="page-nav">
+    <button class="page-nav-btn active" data-section="circuit">Circuit</button>
+    <button class="page-nav-btn" data-section="plateaux">Plateaux 2026</button>
+    <button class="page-nav-btn" data-section="dashboard">Résumé &amp; Infographies</button>
+    <button class="page-nav-btn" data-section="porsche">Porsche au Mans</button>
+  </nav>
+
+
+  <!-- ════════════════════════════════════════
+       CIRCUIT
+       ════════════════════════════════════════ -->
+  <section id="section-circuit" class="lmc-section">
+    <h2 class="section-title">Circuit de la Sarthe</h2>
+    <p class="section-desc">13,626 km de route et de circuit permanent entremêlés. Le circuit de Le Mans est le plus long et le plus mythique des circuits d'endurance au monde.</p>
+
+    <div class="circuit-layout">
+
+      <!-- SVG Circuit -->
+      <div class="circuit-svg-wrap">
+        <svg viewBox="0 0 560 450" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Tracé du Circuit de la Sarthe">
+
+          <!--
+            Circuit de la Sarthe — tracé fidèle, sens horaire
+            Orientation : pit straight à GAUCHE (vertical), Mulsanne à DROITE (vertical)
+            Top : liaison est-ouest via Dunlop → Esses → Tertre Rouge
+            Bottom : Indianapolis → Arnage → Porsche Curves → Chicanes Ford
+          -->
+          <defs>
+            <!--
+              Tracé point par point (sens horaire depuis Start/Finish) :
+              1. Ligne droite des stands (gauche, monte vers le nord)
+              2. Dunlop (virage droit haut-gauche)
+              3. Top : esses + forêt + Maison Blanche → Tertre Rouge (haut-droit)
+              4. Hunaudières / Mulsanne (descend à droite) + 2 chicanes
+              5. Mulsanne Corner (bas-droit, virage gauche)
+              6. Indianapolis S-bend
+              7. Arnage (épingle droite)
+              8. Courbes Porsche (retour bas-gauche)
+              9. Chicanes Ford (2 chicanes avant les stands)
+            -->
+            <path id="lm-circuit" d="
+              M 86,378
+              L 80,118
+              C 80,100 92,84 114,76
+              C 142,66 190,57 248,53
+              C 302,49 360,51 412,57
+              C 444,61 466,77 474,110
+              L 474,188
+              L 459,203
+              L 474,214
+              L 474,292
+              L 459,307
+              L 474,318
+              C 474,350 468,370 448,382
+              C 428,394 400,400 368,400
+              C 345,400 325,408 308,415
+              C 290,423 271,425 255,416
+              C 237,407 220,402 204,406
+              C 187,410 171,418 156,420
+              C 140,421 125,414 115,408
+              L 105,415
+              L 95,408
+              L 87,400
+              L 86,390
+              L 86,378
+            "/>
+          </defs>
+
+          <!-- Glow -->
+          <use href="#lm-circuit" stroke="rgba(255,107,53,0.06)" stroke-width="26" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+          <use href="#lm-circuit" stroke="rgba(255,107,53,0.03)" stroke-width="40" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+
+          <!-- Mulsanne / Hunaudières : orange -->
+          <path d="M 474,110 L 474,188 L 459,203 L 474,214 L 474,292 L 459,307 L 474,318 C 474,350 468,370 448,382"
+                stroke="rgba(232,98,42,0.5)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+          <!-- Tracé principal blanc -->
+          <use href="#lm-circuit" stroke="rgba(255,255,255,0.75)" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+
+          <!-- Chicanes Mulsanne — jaune -->
+          <path d="M 474,188 L 459,203 L 474,214" stroke="rgba(255,210,70,0.9)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M 474,292 L 459,307 L 474,318" stroke="rgba(255,210,70,0.9)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+          <!-- Chicanes Ford — jaune -->
+          <path d="M 115,408 L 105,415 L 95,408 L 87,400" stroke="rgba(255,210,70,0.75)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+          <!-- ═══ START / FINISH ═══ -->
+          <line x1="76" y1="368" x2="96" y2="368" stroke="#E8622A" stroke-width="3"/>
+          <rect x="79" y="363" width="5" height="4" fill="#E8622A" opacity=".8" rx="1"/>
+          <rect x="84" y="363" width="5" height="4" fill="rgba(255,255,255,.45)" rx="1"/>
+          <rect x="79" y="367" width="5" height="4" fill="rgba(255,255,255,.45)" rx="1"/>
+          <rect x="84" y="367" width="5" height="4" fill="#E8622A" opacity=".8" rx="1"/>
+
+          <!-- ═══ ÉTIQUETTE HUNAUDIÈRES ═══ -->
+          <line x1="494" y1="115" x2="494" y2="378" stroke="rgba(232,98,42,.32)" stroke-width="1.2" stroke-dasharray="3,5"/>
+          <text x="498" y="248" fill="rgba(232,98,42,.52)" font-size="7.5" font-family="Inter,sans-serif" font-weight="700" letter-spacing="1.3" writing-mode="vertical-rl" text-anchor="middle">HUNAUDIÈRES</text>
+
+          <!-- ═══ LABELS CORNERS ═══ -->
+
+          <!-- Start/Finish -->
+          <circle cx="86" cy="378" r="5.5" fill="#E8622A"/>
+          <text x="99" y="382" fill="rgba(255,255,255,.7)" font-size="7.5" font-family="Inter,sans-serif" font-weight="600">START / FINISH</text>
+
+          <!-- Dunlop (haut-gauche) -->
+          <circle cx="80" cy="118" r="4" fill="rgba(255,255,255,.55)"/>
+          <text x="92" y="122" fill="rgba(255,255,255,.45)" font-size="7" font-family="Inter,sans-serif" font-weight="600">DUNLOP</text>
+
+          <!-- Esses Forêt (top milieu) -->
+          <circle cx="248" cy="53" r="3.5" fill="rgba(255,255,255,.4)"/>
+          <text x="230" y="44" fill="rgba(255,255,255,.38)" font-size="6.5" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">ESSES FORÊT</text>
+
+          <!-- Tertre Rouge (haut-droit) -->
+          <circle cx="412" cy="57" r="4" fill="rgba(255,255,255,.55)"/>
+          <text x="390" y="48" fill="rgba(255,255,255,.45)" font-size="7" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">TERTRE ROUGE</text>
+
+          <!-- Chicane 1 Mulsanne -->
+          <circle cx="459" cy="203" r="3.5" fill="rgba(255,210,70,.85)"/>
+          <text x="466" y="207" fill="rgba(255,210,70,.7)" font-size="6.5" font-family="Inter,sans-serif" font-weight="700">CHICANE 1</text>
+
+          <!-- Chicane 2 Mulsanne -->
+          <circle cx="459" cy="307" r="3.5" fill="rgba(255,210,70,.85)"/>
+          <text x="466" y="311" fill="rgba(255,210,70,.7)" font-size="6.5" font-family="Inter,sans-serif" font-weight="700">CHICANE 2</text>
+
+          <!-- Mulsanne Corner -->
+          <circle cx="448" cy="382" r="4" fill="rgba(255,255,255,.55)"/>
+          <text x="408" y="398" fill="rgba(255,255,255,.42)" font-size="7" font-family="Inter,sans-serif" font-weight="600">MULSANNE CORNER</text>
+
+          <!-- Indianapolis -->
+          <circle cx="368" cy="400" r="4" fill="rgba(255,255,255,.55)"/>
+          <text x="345" y="413" fill="rgba(255,255,255,.42)" font-size="7" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">INDIANAPOLIS</text>
+
+          <!-- Arnage -->
+          <circle cx="255" cy="416" r="4" fill="rgba(255,255,255,.55)"/>
+          <text x="255" y="434" fill="rgba(255,255,255,.42)" font-size="7" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">ARNAGE</text>
+
+          <!-- Porsche Curves -->
+          <circle cx="156" cy="420" r="4" fill="#E8622A" opacity=".85"/>
+          <text x="156" y="437" fill="rgba(232,98,42,.8)" font-size="7" font-family="Inter,sans-serif" font-weight="700" text-anchor="middle">PORSCHE CURVES</text>
+
+          <!-- Chicanes Ford -->
+          <circle cx="105" cy="415" r="3.5" fill="rgba(255,210,70,.75)"/>
+          <text x="50" y="424" fill="rgba(255,210,70,.6)" font-size="6.5" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">CHICANES FORD</text>
+
+          <!-- ═══ VOITURE ANIMÉE ═══ -->
+          <circle r="5" fill="#E8622A" opacity="0.95">
+            <animateMotion dur="9s" repeatCount="indefinite" rotate="auto">
+              <mpath href="#lm-circuit"/>
+            </animateMotion>
+          </circle>
+          <circle r="9" fill="rgba(232,98,42,0.18)">
+            <animateMotion dur="9s" repeatCount="indefinite" rotate="auto">
+              <mpath href="#lm-circuit"/>
+            </animateMotion>
+          </circle>
+
+        </svg>
+        <p style="text-align:center;font-size:.625rem;color:rgba(255,255,255,.2);margin-top:.75rem;letter-spacing:.08em;text-transform:uppercase">Circuit de la Sarthe · 13,626 km · Tracé officiel</p>
+      </div>
+
+      <!-- Circuit Stats -->
+      <div>
+        <div class="stat-grid" style="margin-bottom:1px">
+          <div class="circuit-stat-group">
+            <span class="csg-label">Longueur totale</span>
+            <span class="csg-value">13,626</span>
+            <span class="csg-sub">kilomètres</span>
+          </div>
+          <div class="circuit-stat-group">
+            <span class="csg-label">Ligne droite Mulsanne</span>
+            <span class="csg-value">5,9 km</span>
+            <span class="csg-sub">la plus longue du monde</span>
+          </div>
+          <div class="circuit-stat-group">
+            <span class="csg-label">Vitesse max</span>
+            <span class="csg-value">340</span>
+            <span class="csg-sub">km/h (Porsche 919 Hybrid)</span>
+          </div>
+          <div class="circuit-stat-group">
+            <span class="csg-label">Virages</span>
+            <span class="csg-value">38</span>
+            <span class="csg-sub">dont 2 chicanes Mulsanne</span>
+          </div>
+        </div>
+
+        <div class="circuit-sections">
+          <div class="cs-item">
+            <div class="cs-dot" style="background:#E8622A"></div>
+            <span class="cs-name">Ligne droite des stands</span>
+            <span class="cs-km">~1,0 km</span>
+          </div>
+          <div class="cs-item">
+            <div class="cs-dot" style="background:rgba(255,255,255,.5)"></div>
+            <span class="cs-name">Dunlop · Esses du Tertre</span>
+            <span class="cs-km">~1,8 km</span>
+          </div>
+          <div class="cs-item">
+            <div class="cs-dot" style="background:rgba(255,255,255,.5)"></div>
+            <span class="cs-name">Mulsanne Straight (3 sections)</span>
+            <span class="cs-km">~5,9 km</span>
+          </div>
+          <div class="cs-item">
+            <div class="cs-dot" style="background:rgba(255,255,255,.5)"></div>
+            <span class="cs-name">Mulsanne Corner · Arnage</span>
+            <span class="cs-km">~1,2 km</span>
+          </div>
+          <div class="cs-item">
+            <div class="cs-dot" style="background:#E8622A; opacity:.7"></div>
+            <span class="cs-name">Porsche Curves · Maison Blanche</span>
+            <span class="cs-km">~3,7 km</span>
+          </div>
+        </div>
+
+        <div style="margin-top:1.25rem;background:rgba(232,98,42,.06);border:1px solid rgba(232,98,42,.15);border-radius:14px;padding:1rem 1.25rem">
+          <p style="font-size:.6875rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,98,42,.8);margin-bottom:.4rem">🏁 Porsche Curves</p>
+          <p style="font-size:.8125rem;color:rgba(255,255,255,.55);line-height:1.6">Nommée en hommage à la 956/962, cette séquence de virages rapides à droite a été théatre de nombreuses victoires Porsche. Les courbes portent le nom de la marque depuis 1988.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════
+       PLATEAUX 2026
+       ════════════════════════════════════════ -->
+  <section id="section-plateaux" class="lmc-section hidden">
+    <h2 class="section-title">Plateaux 2026</h2>
+    <p class="section-desc">Le Mans Classique organise les voitures en <strong style="color:var(--text-primary)">10 Plateaux</strong> selon leur année de construction et leur catégorie d'origine. Les Plateaux 6 à 10 sont confirmés pour 2026 sur le site officiel.</p>
+
+    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:2rem;flex-wrap:wrap">
+      <span style="display:inline-flex;align-items:center;gap:.4rem;font-size:.6875rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#ff6b35;background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.25);padding:.3rem .75rem;border-radius:100px">
+        <span style="width:6px;height:6px;border-radius:50%;background:#ff6b35;display:inline-block"></span>
+        Officiels 2026
+      </span>
+      <span style="display:inline-flex;align-items:center;gap:.4rem;font-size:.6875rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:.3rem .75rem;border-radius:100px">
+        Éditions précédentes
+      </span>
+    </div>
+
+    <div class="plateau-grid">
+
+      <!-- Plateau 1 -->
+      <div class="plateau-card">
+        <div class="plateau-tag history-tag">Éditions précédentes</div>
+        <div class="plateau-num">01</div>
+        <div class="plateau-name">Les Pionniers</div>
+        <div class="plateau-years">1923 — 1939</div>
+        <div class="plateau-cars">Bugatti · Bentley · Alfa Romeo · Riley · Aston Martin<br><em style="color:rgba(255,255,255,.25)">Pré-Porsche</em></div>
+      </div>
+
+      <!-- Plateau 2 -->
+      <div class="plateau-card">
+        <div class="plateau-tag history-tag">Éditions précédentes</div>
+        <div class="plateau-num">02</div>
+        <div class="plateau-name">L'Après-Guerre</div>
+        <div class="plateau-years">1949 — 1956</div>
+        <div class="plateau-cars">Ferrari · Jaguar · Aston Martin · Mercedes<br><span class="porsche">Porsche 356 SL · 550 Spyder</span></div>
+      </div>
+
+      <!-- Plateau 3 -->
+      <div class="plateau-card">
+        <div class="plateau-tag history-tag">Éditions précédentes</div>
+        <div class="plateau-num">03</div>
+        <div class="plateau-name">Les Spyders</div>
+        <div class="plateau-years">1957 — 1961</div>
+        <div class="plateau-cars">Aston Martin DBR1 · Ferrari TRI · Maserati<br><span class="porsche">Porsche 718 RSK · 718 RS 60 · 718 RS 61</span></div>
+      </div>
+
+      <!-- Plateau 4 -->
+      <div class="plateau-card">
+        <div class="plateau-tag history-tag">Éditions précédentes</div>
+        <div class="plateau-num">04</div>
+        <div class="plateau-name">Les GTs Historiques</div>
+        <div class="plateau-years">1962 — 1965</div>
+        <div class="plateau-cars">Ferrari 250 GTO · AC Cobra · Ford GT40 Mk I<br><span class="porsche">Porsche 904 Carrera GTS · 904/6 · 904/8</span></div>
+      </div>
+
+      <!-- Plateau 5 -->
+      <div class="plateau-card">
+        <div class="plateau-tag history-tag">Éditions précédentes</div>
+        <div class="plateau-num">05</div>
+        <div class="plateau-name">Les Années Ford</div>
+        <div class="plateau-years">1966 — 1971</div>
+        <div class="plateau-cars">Ford GT40 Mk II/IV · Ferrari 512 S · Matra<br><span class="porsche">Porsche 906 · 910 · 907 · 908 · 917K</span><br><em style="font-size:.625rem;color:rgba(232,98,42,.6)">917K — victoires 1970 &amp; 1971</em></div>
+      </div>
+
+      <!-- Plateau 6 — OFFICIEL -->
+      <div class="plateau-card official">
+        <div class="plateau-tag official-tag">
+          <span style="width:5px;height:5px;border-radius:50%;background:#ff6b35;display:inline-block"></span>
+          Officiel 2026
+        </div>
+        <div class="plateau-num">06</div>
+        <div class="plateau-name">La Transition</div>
+        <div class="plateau-years">Proto 1972–1981 · GT 1975–1984</div>
+        <div class="plateau-cars">Ferrari 512 BB LM · Lancia Beta · Rondeau M379<br><span class="porsche">Porsche 935 · 936/76 · 936/77 · 908/3</span><br><em style="font-size:.625rem;color:rgba(232,98,42,.6)">936 — victoires 1976, 1977, 1981</em></div>
+      </div>
+
+      <!-- Plateau 7 — OFFICIEL -->
+      <div class="plateau-card official">
+        <div class="plateau-tag official-tag">
+          <span style="width:5px;height:5px;border-radius:50%;background:#ff6b35;display:inline-block"></span>
+          Officiel 2026
+        </div>
+        <div class="plateau-num">07</div>
+        <div class="plateau-name">Groupe C</div>
+        <div class="plateau-years">1982 — 1993</div>
+        <div class="plateau-cars">Jaguar XJR-9 · Sauber-Mercedes C9 · Nissan R90<br>Toyota 88C · Peugeot 905 · Mazda 787B<br><span class="porsche">Porsche 956 · 962C</span><br><em style="font-size:.625rem;color:rgba(232,98,42,.6)">956/962 — 6 victoires consécutives (1982–1987)</em></div>
+      </div>
+
+      <!-- Plateau 8 — OFFICIEL -->
+      <div class="plateau-card official">
+        <div class="plateau-tag official-tag">
+          <span style="width:5px;height:5px;border-radius:50%;background:#ff6b35;display:inline-block"></span>
+          Officiel 2026
+        </div>
+        <div class="plateau-num">08</div>
+        <div class="plateau-name">GT &amp; Proto années 90</div>
+        <div class="plateau-years">Proto &amp; GT 1994 — 1999</div>
+        <div class="plateau-cars">McLaren F1 GTR · Mercedes CLK-LM · Toyota GT-One<br>TWR WSC-95 · Dauer 962 LM<br><span class="porsche">Porsche 911 GT1-98</span><br><em style="font-size:.625rem;color:rgba(232,98,42,.6)">GT1-98 — victoire 1998 in extremis sur McLaren</em></div>
+      </div>
+
+      <!-- Plateau 9 — OFFICIEL -->
+      <div class="plateau-card official">
+        <div class="plateau-tag official-tag">
+          <span style="width:5px;height:5px;border-radius:50%;background:#ff6b35;display:inline-block"></span>
+          Officiel 2026
+        </div>
+        <div class="plateau-num">09</div>
+        <div class="plateau-name">L'Ère Audi</div>
+        <div class="plateau-years">Proto 2000–2005 · GT 2000–2010</div>
+        <div class="plateau-cars">Audi R8 · Bentley Speed 8 · Pescarolo 01<br>Ferrari 550 Maranello · Saleen S7-R · Corvette C6.R<br><span class="porsche">Porsche 996 GT3 RSR · 911 GT3 RS</span></div>
+      </div>
+
+      <!-- Plateau 10 — OFFICIEL -->
+      <div class="plateau-card official">
+        <div class="plateau-tag official-tag">
+          <span style="width:5px;height:5px;border-radius:50%;background:#ff6b35;display:inline-block"></span>
+          Officiel 2026
+        </div>
+        <div class="plateau-num">10</div>
+        <div class="plateau-name">Legends of Le Mans</div>
+        <div class="plateau-years">LMP1 2006–2012 · LMP2 2006–2015 · GTE 2011–2020</div>
+        <div class="plateau-cars">Audi R10 TDI · Peugeot 908 · Oreca 03 · HPD ARX-03<br>Ferrari 458 GTE · Aston Martin Vantage · Corvette<br><span class="porsche">Porsche 911 RSR · 919 Hybrid</span><br><em style="font-size:.625rem;color:rgba(232,98,42,.6)">919 Hybrid — triplé historique 2015–2017</em></div>
+      </div>
+
+    </div>
+
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1rem 1.5rem;font-size:.8125rem;color:rgba(255,255,255,.4);line-height:1.6">
+      <strong style="color:rgba(255,255,255,.6)">Source officielle :</strong> Les Plateaux 6 à 10 sont confirmés sur <a href="https://www.lemansclassic.com/fr/competition/plateaux/" target="_blank" rel="noopener" style="color:#ff6b35;text-decoration:none">lemansclassic.com</a>. Les Plateaux 1 à 5 sont basés sur les éditions précédentes.
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════
+       DASHBOARD / INFOGRAPHIES
+       ════════════════════════════════════════ -->
+  <section id="section-dashboard" class="lmc-section hidden">
+    <h2 class="section-title">Résumé &amp; Infographies</h2>
+    <p class="section-desc">Les 24 Heures du Mans en chiffres — de la ligne de départ au drapeau à damier.</p>
+
+    <!-- Big stats -->
+    <div class="dashboard-grid">
+      <div class="dash-card">
+        <div class="dash-icon">🕐</div>
+        <div class="dash-value">24</div>
+        <div class="dash-label">heures de course</div>
+        <div class="dash-sub">15h00 samedi → 15h00 dimanche</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-icon">📏</div>
+        <div class="dash-value">13,626</div>
+        <div class="dash-label">km par tour</div>
+        <div class="dash-sub">plus long circuit actif au monde</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-icon">🏎️</div>
+        <div class="dash-value">380+</div>
+        <div class="dash-label">tours en 24h</div>
+        <div class="dash-sub">hypercar moderne, rythme record</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-icon">⚡</div>
+        <div class="dash-value">340</div>
+        <div class="dash-label">km/h max</div>
+        <div class="dash-sub">Porsche 919 Hybrid, Mulsanne</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem" class="two-col-responsive">
+
+      <!-- Race Timeline -->
+      <div class="race-timeline">
+        <div class="rt-header">Chronologie type d'une édition Le Mans Classique</div>
+        <div class="rt-item">
+          <div class="rt-dot" style="background:#E8622A"></div>
+          <div class="rt-time">Vendredi</div>
+          <div>
+            <div class="rt-event">Vérifications techniques</div>
+            <div class="rt-detail">Contrôle des 500+ voitures inscrits · Briefings pilotes</div>
+          </div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-dot" style="background:rgba(255,255,255,.4)"></div>
+          <div class="rt-time">Sam. matin</div>
+          <div>
+            <div class="rt-event">Qualifications par Plateau</div>
+            <div class="rt-detail">Chaque Plateau a ses sessions de qualification distinctes</div>
+          </div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-dot" style="background:#E8622A"></div>
+          <div class="rt-time">Sam. 15h00</div>
+          <div>
+            <div class="rt-event">Départ du Plateau 1</div>
+            <div class="rt-detail">Départ lancé façon années 20 — les voitures les plus anciennes en premier</div>
+          </div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-dot" style="background:rgba(255,255,255,.4)"></div>
+          <div class="rt-time">Nuit</div>
+          <div>
+            <div class="rt-event">Courses de nuit</div>
+            <div class="rt-detail">Plateaux 5–10 · course sous les étoiles de la Sarthe</div>
+          </div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-dot" style="background:rgba(255,255,255,.4)"></div>
+          <div class="rt-time">Dim. matin</div>
+          <div>
+            <div class="rt-event">Derniers Plateaux</div>
+            <div class="rt-detail">Groupe C · GT1 · Legends of Le Mans sur la piste</div>
+          </div>
+        </div>
+        <div class="rt-item">
+          <div class="rt-dot" style="background:#E8622A"></div>
+          <div class="rt-time">Dim. 17h00</div>
+          <div>
+            <div class="rt-event">Podiums &amp; Clôture</div>
+            <div class="rt-detail">Remise des prix par Plateau · Parade des vainqueurs</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Figures -->
+      <div style="display:flex;flex-direction:column;gap:1px">
+        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1px">
+          <p style="font-size:.5625rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:.5rem">Participation type</p>
+          <div style="display:flex;flex-direction:column;gap:.5rem">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:.8125rem;color:var(--text-secondary)">Voitures engagées</span>
+              <span style="font-size:1.125rem;font-weight:800;color:var(--text-primary)">500+</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:.8125rem;color:var(--text-secondary)">Nationalités représentées</span>
+              <span style="font-size:1.125rem;font-weight:800;color:var(--text-primary)">30+</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:.8125rem;color:var(--text-secondary)">Plateaux (grilles)</span>
+              <span style="font-size:1.125rem;font-weight:800;color:var(--text-primary)">10</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:.8125rem;color:var(--text-secondary)">Spectateurs</span>
+              <span style="font-size:1.125rem;font-weight:800;color:var(--text-primary)">100 000+</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:rgba(232,98,42,.06);border:1px solid rgba(232,98,42,.18);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1px">
+          <p style="font-size:.5625rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(232,98,42,.7);margin-bottom:.5rem">🏆 Porsche au Mans Classique</p>
+          <div style="display:flex;flex-direction:column;gap:.5rem">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:.8125rem;color:var(--text-secondary)">Modèles engageables</span>
+              <span style="font-size:1.125rem;font-weight:800;color:#E8622A">20+</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:.8125rem;color:var(--text-secondary)">Plateaux concernés</span>
+              <span style="font-size:1.125rem;font-weight:800;color:#E8622A">8 / 10</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:.8125rem;color:var(--text-secondary)">1ère participation Porsche</span>
+              <span style="font-size:1.125rem;font-weight:800;color:#E8622A">1951</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.25rem 1.5rem">
+          <p style="font-size:.5625rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:.5rem">Distance record 24h (absolu)</p>
+          <p style="font-size:2.5rem;font-weight:900;letter-spacing:-.05em;color:var(--text-primary);line-height:1">5 410</p>
+          <p style="font-size:.75rem;color:rgba(255,255,255,.35)">km · Audi R18 e-tron quattro (2010)</p>
+        </div>
+      </div>
+
+    </div>
+
+    <style>.two-col-responsive{} @media(max-width:768px){.two-col-responsive{grid-template-columns:1fr!important}}</style>
+
+    <!-- Podium bar chart (CSS) -->
+    <h3 style="font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:1rem;letter-spacing:-.01em">Constructeurs les plus victorieux aux 24 Heures du Mans</h3>
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.5rem;display:flex;flex-direction:column;gap:.75rem">
+      <!-- Porsche -->
+      <div style="display:flex;align-items:center;gap:1rem">
+        <span style="font-size:.75rem;font-weight:700;color:#E8622A;width:100px;flex-shrink:0">Porsche</span>
+        <div style="flex:1;height:28px;background:rgba(232,98,42,.12);border-radius:4px;position:relative;overflow:hidden">
+          <div style="width:100%;height:100%;background:linear-gradient(90deg,rgba(232,98,42,.6),rgba(232,98,42,.3));border-radius:4px"></div>
+          <span style="position:absolute;right:.5rem;top:50%;transform:translateY(-50%);font-size:.75rem;font-weight:800;color:#E8622A">19 victoires</span>
+        </div>
+      </div>
+      <!-- Audi -->
+      <div style="display:flex;align-items:center;gap:1rem">
+        <span style="font-size:.75rem;font-weight:700;color:rgba(255,255,255,.6);width:100px;flex-shrink:0">Audi</span>
+        <div style="flex:1;height:28px;background:rgba(255,255,255,.05);border-radius:4px;position:relative">
+          <div style="width:58%;height:100%;background:rgba(255,255,255,.08);border-radius:4px"></div>
+          <span style="position:absolute;right:.5rem;top:50%;transform:translateY(-50%);font-size:.75rem;font-weight:800;color:rgba(255,255,255,.5)">13 victoires</span>
+        </div>
+      </div>
+      <!-- Ferrari -->
+      <div style="display:flex;align-items:center;gap:1rem">
+        <span style="font-size:.75rem;font-weight:700;color:rgba(255,255,255,.6);width:100px;flex-shrink:0">Ferrari</span>
+        <div style="flex:1;height:28px;background:rgba(255,255,255,.05);border-radius:4px;position:relative">
+          <div style="width:45%;height:100%;background:rgba(255,255,255,.08);border-radius:4px"></div>
+          <span style="position:absolute;right:.5rem;top:50%;transform:translateY(-50%);font-size:.75rem;font-weight:800;color:rgba(255,255,255,.5)">9 victoires</span>
+        </div>
+      </div>
+      <!-- Jaguar -->
+      <div style="display:flex;align-items:center;gap:1rem">
+        <span style="font-size:.75rem;font-weight:700;color:rgba(255,255,255,.6);width:100px;flex-shrink:0">Jaguar</span>
+        <div style="flex:1;height:28px;background:rgba(255,255,255,.05);border-radius:4px;position:relative">
+          <div style="width:27%;height:100%;background:rgba(255,255,255,.08);border-radius:4px"></div>
+          <span style="position:absolute;right:.5rem;top:50%;transform:translateY(-50%);font-size:.75rem;font-weight:800;color:rgba(255,255,255,.5)">7 victoires</span>
+        </div>
+      </div>
+      <!-- Toyota -->
+      <div style="display:flex;align-items:center;gap:1rem">
+        <span style="font-size:.75rem;font-weight:700;color:rgba(255,255,255,.6);width:100px;flex-shrink:0">Toyota</span>
+        <div style="flex:1;height:28px;background:rgba(255,255,255,.05);border-radius:4px;position:relative">
+          <div style="width:24%;height:100%;background:rgba(255,255,255,.08);border-radius:4px"></div>
+          <span style="position:absolute;right:.5rem;top:50%;transform:translateY(-50%);font-size:.75rem;font-weight:800;color:rgba(255,255,255,.5)">6 victoires</span>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- ════════════════════════════════════════
+       PORSCHE AU MANS
+       ════════════════════════════════════════ -->
+  <section id="section-porsche" class="lmc-section hidden">
+    <h2 class="section-title">Porsche aux 24H du Mans</h2>
+    <p class="section-desc">19 victoires absolues — le record inégalé de l'histoire des 24 Heures. De la 356 SL en 1951 à la 919 Hybrid en 2017, Porsche a marqué chaque décennie de la course.</p>
+
+    <div class="winners-grid">
+      <div class="winner-card">
+        <div class="winner-year">1970</div>
+        <div class="winner-car">Porsche 917K</div>
+        <div class="winner-class">Victoire absolue</div>
+        <div class="winner-note">Attwood &middot; Herrmann<br><em>1ère victoire absolue Porsche</em></div>
+      </div>
+      <div class="winner-card">
+        <div class="winner-year">1971</div>
+        <div class="winner-car">Porsche 917K</div>
+        <div class="winner-class">Victoire absolue</div>
+        <div class="winner-note">Marko &middot; van Lennep<br><em>Record de distance — 5 335 km (tenu 39 ans)</em></div>
+      </div>
+      <div class="winner-card">
+        <div class="winner-year">1976</div>
+        <div class="winner-car">Porsche 936/76</div>
+        <div class="winner-class">Victoire absolue</div>
+        <div class="winner-note">Ickx &middot; van Lennep</div>
+      </div>
+      <div class="winner-card">
+        <div class="winner-year">1977</div>
+        <div class="winner-car">Porsche 936/77</div>
+        <div class="winner-class">Victoire absolue</div>
+        <div class="winner-note">Ickx &middot; Barth &middot; Haywood</div>
+      </div>
+      <div class="winner-card">
+        <div class="winner-year">1979</div>
+        <div class="winner-car">Porsche 935 K3</div>
+        <div class="winner-class">Victoire absolue</div>
+        <div class="winner-note">Ludwig &middot; W. Whittington &middot; B. Whittington<br><em>935 privé — exploit inattendu</em></div>
+      </div>
+      <div class="winner-card">
+        <div class="winner-year">1981</div>
+        <div class="winner-car">Porsche 936/81</div>
+        <div class="winner-class">Victoire absolue</div>
+        <div class="winner-note">Ickx &middot; Bell<br><em>5ème victoire pour Ickx — record</em></div>
+      </div>
+      <div class="winner-card" style="border-top:2px solid rgba(232,98,42,.3)">
+        <div class="winner-year" style="font-size:1.25rem">1982–87</div>
+        <div class="winner-car">Porsche 956 / 962C</div>
+        <div class="winner-class">6 victoires consécutives</div>
+        <div class="winner-note">Ickx &middot; Bell &middot; Ludwig &middot; Holbert &middot; Stuck<br><em>Domination absolue — record inégalé</em></div>
+      </div>
+      <div class="winner-card">
+        <div class="winner-year">1994</div>
+        <div class="winner-car">Dauer 962 LM</div>
+        <div class="winner-class">Victoire absolue</div>
+        <div class="winner-note">Dalmas &middot; Haywood &middot; Baldi</div>
+      </div>
+      <div class="winner-card">
+        <div class="winner-year">1996</div>
+        <div class="winner-car">TWR-Porsche WSC-95</div>
+        <div class="winner-class">Victoire absolue</div>
+        <div class="winner-note">Jones &middot; Reuter &middot; Wurz</div>
+      </div>
+      <div class="winner-card">
+        <div class="winner-year">1997</div>
+        <div class="winner-car">TWR-Porsche WSC-95</div>
+        <div class="winner-class">Victoire absolue</div>
+        <div class="winner-note">Alboreto &middot; Johansson &middot; Kristensen</div>
+      </div>
+      <div class="winner-card">
+        <div class="winner-year">1998</div>
+        <div class="winner-car">Porsche 911 GT1-98</div>
+        <div class="winner-class">Victoire absolue</div>
+        <div class="winner-note">McNish &middot; Aiello &middot; Ortelli<br><em>Victoire in extremis sur McLaren F1</em></div>
+      </div>
+      <div class="winner-card">
+        <div class="winner-year">2015</div>
+        <div class="winner-car">Porsche 919 Hybrid</div>
+        <div class="winner-class">Victoire absolue · Retour en proto</div>
+        <div class="winner-note">Hülkenberg &middot; Tandy &middot; Bamber</div>
+      </div>
+      <div class="winner-card">
+        <div class="winner-year">2016</div>
+        <div class="winner-car">Porsche 919 Hybrid</div>
+        <div class="winner-class">Victoire absolue</div>
+        <div class="winner-note">Bamber &middot; Bernhard &middot; Hartley</div>
+      </div>
+      <div class="winner-card" style="border-top:2px solid rgba(232,98,42,.3)">
+        <div class="winner-year">2017</div>
+        <div class="winner-car">Porsche 919 Hybrid</div>
+        <div class="winner-class">19ème victoire absolue — RECORD MONDIAL</div>
+        <div class="winner-note">Bernhard &middot; Bamber &middot; Hartley<br><em>Dernier engagement Porsche en LMP1</em></div>
+      </div>
+    </div>
+  </section>
+
+
+  <script>
+    /* ── PAGE NAV ── */
+    const navBtns = document.querySelectorAll('.page-nav-btn');
+    const sections = document.querySelectorAll('.lmc-section');
+
+    navBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        navBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const id = 'section-' + btn.dataset.section;
+        sections.forEach(s => s.classList.toggle('hidden', s.id !== id));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+  </script>
+
+</body>
+</html>

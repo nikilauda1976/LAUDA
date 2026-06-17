@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collection — Garage Privé</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Three.js importmap -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <!-- GSAP + ScrollTrigger (must load before ES modules) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/components.css">
+
+  <!-- App (deferred ES module) -->
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+
+  <!-- ═══ NAVIGATION ═══ -->
+  <nav class="nav-glass" id="nav">
+    <a href="#hero" class="nav-logo">
+      <span class="logo-dot"></span>
+      Collection
+    </a>
+    <ul class="nav-links">
+      <li><a href="#porsche-912" data-nav>912 Targa</a></li>
+      <li><a href="#porsche-964" data-nav>964 Turbolook</a></li>
+      <li><a href="#porsche-991" data-nav>991 Phase 1</a></li>
+      <li><a href="#bmw-x5" data-nav>X5 xDrive50e</a></li>
+      <li class="nav-sep" aria-hidden="true"></li>
+      <li><a href="catalogue.html" class="nav-catalogue-link">Catalogue</a></li>
+      <li><a href="lemans-classique.html" class="nav-catalogue-link">Le Mans Classique</a></li>
+    </ul>
+  </nav>
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero-section" id="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-bg-glow"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Garage Privé · Collection 2024</p>
+      <h1 class="hero-title">Collection</h1>
+      <p class="hero-subtitle">Quatre machines. Une obsession.</p>
+      <div class="hero-car-count">
+        <span class="count-num">04</span>
+        <span class="count-label">Véhicules</span>
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- ═══ CHRONOLOGIE — removed, see catalogue.html ═══ -->
+  <section class="heritage-section" id="heritage" aria-label="Chronologie Porsche" style="display:none">
+    <div class="heritage-inner">
+      <header class="section-header">
+        <p class="section-eyebrow">Porsche · 1948 — aujourd'hui</p>
+        <h2 class="section-heading">L'arbre généalogique</h2>
+        <p class="section-subtext">De la 356 fondatrice aux modèles électriques — une lignée pure.</p>
+      </header>
+
+      <div class="heritage-timeline" role="list">
+
+        <article class="ht-era" role="listitem">
+          <div class="ht-connector"></div>
+          <div class="ht-dot" style="--era-c:#c8a96e"></div>
+          <div class="ht-body">
+            <span class="ht-period">1948 — 1965</span>
+            <h3 class="ht-model">356</h3>
+            <p class="ht-desc">Coupé · Cabriolet · Speedster — la fondatrice</p>
+          </div>
+        </article>
+
+        <article class="ht-era ht-era--yours" role="listitem">
+          <div class="ht-connector"></div>
+          <div class="ht-dot" style="--era-c:#E8622A"></div>
+          <div class="ht-body">
+            <span class="ht-period">1963 — 1973</span>
+            <h3 class="ht-model">911 (901) · 912</h3>
+            <p class="ht-desc">Flat-6 2.0 L · carrosserie SWB · Targa soft-window</p>
+            <span class="ht-badge" style="--badge-c:#E8622A">Votre 912</span>
+          </div>
+        </article>
+
+        <article class="ht-era" role="listitem">
+          <div class="ht-connector"></div>
+          <div class="ht-dot" style="--era-c:#8899bb"></div>
+          <div class="ht-body">
+            <span class="ht-period">1973 — 1989</span>
+            <h3 class="ht-model">Type G · 930</h3>
+            <p class="ht-desc">Carrera RS 2.7 · Turbo 3.3 · Speedster</p>
+          </div>
+        </article>
+
+        <article class="ht-era ht-era--yours" role="listitem">
+          <div class="ht-connector"></div>
+          <div class="ht-dot" style="--era-c:#1A3A7A"></div>
+          <div class="ht-body">
+            <span class="ht-period">1989 — 1994</span>
+            <h3 class="ht-model">964</h3>
+            <p class="ht-desc">Carrera 2 / 4 · Turbo · RS · Cabriolet Turbolook</p>
+            <span class="ht-badge" style="--badge-c:#1A3A7A">Votre 964</span>
+          </div>
+        </article>
+
+        <article class="ht-era" role="listitem">
+          <div class="ht-connector"></div>
+          <div class="ht-dot" style="--era-c:#8899bb"></div>
+          <div class="ht-body">
+            <span class="ht-period">1994 — 2005</span>
+            <h3 class="ht-model">993 · 996</h3>
+            <p class="ht-desc">Dernier refroidi par air (993) · GT3 (996)</p>
+          </div>
+        </article>
+
+        <article class="ht-era" role="listitem">
+          <div class="ht-connector"></div>
+          <div class="ht-dot" style="--era-c:#8899bb"></div>
+          <div class="ht-body">
+            <span class="ht-period">2004 — 2012</span>
+            <h3 class="ht-model">997</h3>
+            <p class="ht-desc">GT2 RS · GT3 RS 4.0 · Sport Classic</p>
+          </div>
+        </article>
+
+        <article class="ht-era ht-era--yours" role="listitem">
+          <div class="ht-connector"></div>
+          <div class="ht-dot" style="--era-c:#1A3A7A"></div>
+          <div class="ht-body">
+            <span class="ht-period">2011 — 2019</span>
+            <h3 class="ht-model">991</h3>
+            <p class="ht-desc">Carrera / S / GTS · GT3 RS · GT2 RS · 911 R</p>
+            <span class="ht-badge" style="--badge-c:#1A3A7A">Votre 991</span>
+          </div>
+        </article>
+
+        <article class="ht-era" role="listitem">
+          <div class="ht-connector"></div>
+          <div class="ht-dot" style="--era-c:#6e8efb"></div>
+          <div class="ht-body">
+            <span class="ht-period">2019 — aujourd'hui</span>
+            <h3 class="ht-model">992</h3>
+            <p class="ht-desc">T-Hybrid · Dakar · Sport Classic · GT3 RS</p>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PORSCHE 912 TARGA ═══ -->
+  <section class="car-section" id="porsche-912" data-car="912">
+    <div class="section-ambient" style="--ambient-color: #E8622A"></div>
+    <div class="car-canvas-wrap" id="viewer-912"></div>
+    <div class="car-info-wrap">
+      <div class="glass-card">
+        <div class="car-header">
+          <div class="color-badge" style="--car-color: #E8622A; --car-glow: #E8622A66"></div>
+          <p class="car-brand">Porsche</p>
+          <div class="car-index">01 / 04</div>
+        </div>
+        <h2 class="car-model">912 Targa</h2>
+        <p class="car-year">1967 — 1969</p>
+        <div class="car-color-name">
+          <span class="color-swatch" style="background: #E8622A"></span>
+          Orange Signal
+        </div>
+        <div class="specs-grid">
+          <div class="spec-row">
+            <span class="spec-label">Moteur</span>
+            <span class="spec-value">4 cyl. à plat — 1,6 L</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Puissance</span>
+            <span class="spec-value">90 ch</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">0 – 100 km/h</span>
+            <span class="spec-value">~13 s</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Vitesse max</span>
+            <span class="spec-value">185 km/h</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Transmission</span>
+            <span class="spec-value">Manuelle 5 rapports</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Carrosserie</span>
+            <span class="spec-value">Targa</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PORSCHE 964 TURBOLOOK CABRIOLET ═══ -->
+  <section class="car-section car-section--reverse" id="porsche-964" data-car="964">
+    <div class="section-ambient" style="--ambient-color: #1A3A7A"></div>
+    <div class="car-canvas-wrap" id="viewer-964"></div>
+    <div class="car-info-wrap">
+      <div class="glass-card">
+        <div class="car-header">
+          <div class="color-badge" style="--car-color: #1A3A7A; --car-glow: #1A3A7A88"></div>
+          <p class="car-brand">Porsche</p>
+          <div class="car-index">02 / 04</div>
+        </div>
+        <h2 class="car-model">964 Turbolook<br>Cabriolet</h2>
+        <p class="car-year">1989 — 1994</p>
+        <div class="car-color-name">
+          <span class="color-swatch" style="background: #0D1B3E"></span>
+          Bleu Marine Nuit
+        </div>
+        <div class="specs-grid">
+          <div class="spec-row">
+            <span class="spec-label">Moteur</span>
+            <span class="spec-value">6 cyl. à plat — 3,6 L</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Puissance</span>
+            <span class="spec-value">250 ch</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">0 – 100 km/h</span>
+            <span class="spec-value">5,7 s</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Vitesse max</span>
+            <span class="spec-value">260 km/h</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Transmission</span>
+            <span class="spec-value">Manuelle 5 rapports</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Carrosserie</span>
+            <span class="spec-value">Cabriolet Turbolook</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PORSCHE 991 PHASE 1 ═══ -->
+  <section class="car-section" id="porsche-991" data-car="991">
+    <div class="section-ambient" style="--ambient-color: #1A3A7A"></div>
+    <div class="car-canvas-wrap" id="viewer-991"></div>
+    <div class="car-info-wrap">
+      <div class="glass-card">
+        <div class="car-header">
+          <div class="color-badge" style="--car-color: #1A3A7A; --car-glow: #1A3A7A88"></div>
+          <p class="car-brand">Porsche</p>
+          <div class="car-index">03 / 04</div>
+        </div>
+        <h2 class="car-model">991 Phase 1</h2>
+        <p class="car-year">2011 — 2015</p>
+        <div class="car-color-name">
+          <span class="color-swatch" style="background: #0D1B3E"></span>
+          Bleu Marine Nuit
+        </div>
+        <div class="specs-grid">
+          <div class="spec-row">
+            <span class="spec-label">Moteur</span>
+            <span class="spec-value">6 cyl. à plat — 3,4 L</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Puissance</span>
+            <span class="spec-value">350 ch (S : 400 ch)</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">0 – 100 km/h</span>
+            <span class="spec-value">4,6 s (S : 4,1 s)</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Vitesse max</span>
+            <span class="spec-value">289 km/h (S : 302 km/h)</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Transmission</span>
+            <span class="spec-value">PDK 7 rap. / Manu 7 rap.</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Carrosserie</span>
+            <span class="spec-value">Coupé</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ BMW X5 xDRIVE50e ═══ -->
+  <section class="car-section car-section--reverse" id="bmw-x5" data-car="x5">
+    <div class="section-ambient" style="--ambient-color: #1A3A7A"></div>
+    <div class="car-canvas-wrap" id="viewer-x5"></div>
+    <div class="car-info-wrap">
+      <div class="glass-card">
+        <div class="car-header">
+          <div class="color-badge" style="--car-color: #1A3A7A; --car-glow: #1A3A7A88"></div>
+          <p class="car-brand">BMW</p>
+          <div class="car-index">04 / 04</div>
+        </div>
+        <h2 class="car-model">X5 xDrive50e</h2>
+        <p class="car-year">2023 — présent</p>
+        <div class="car-color-name">
+          <span class="color-swatch" style="background: #0D1B3E"></span>
+          Bleu Marine Nuit
+        </div>
+        <div class="specs-grid">
+          <div class="spec-row">
+            <span class="spec-label">Moteur</span>
+            <span class="spec-value">6 cyl. 3,0 L + Électrique</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Puissance</span>
+            <span class="spec-value">489 ch combinés</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">0 – 100 km/h</span>
+            <span class="spec-value">4,7 s</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Vitesse max</span>
+            <span class="spec-value">250 km/h (limitée)</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Autonomie élec.</span>
+            <span class="spec-value">~90 km (WLTP)</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Transmission</span>
+            <span class="spec-value">Steptronic 8 rapports</span>
+          </div>
+        </div>
+        <div class="hybrid-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13 2L4.09 12.97 11 12.01 11 22 19.91 11.03 13 12z"/>
+          </svg>
+          Hybride Rechargeable
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PALETTE — removed, see catalogue.html ═══ -->
+  <section class="palette-section" id="palette" aria-label="Palette de couleurs Porsche" style="display:none">
+    <div class="palette-inner">
+      <header class="section-header">
+        <p class="section-eyebrow">Paint to Sample · Catalogue historique</p>
+        <h2 class="section-heading">Palette Porsche</h2>
+        <p class="section-subtext">Des teintes de fondation aux créations exclusives — une identité chromatique unique.</p>
+      </header>
+
+      <div class="palette-group">
+        <h3 class="palette-group-label">Vos teintes</h3>
+        <div class="palette-grid">
+          <div class="csw-card csw-card--featured">
+            <div class="csw-circle" style="background:#E8622A; box-shadow:0 0 32px rgba(232,98,42,0.45)"></div>
+            <span class="csw-name">Orange Signal</span>
+            <span class="csw-meta">Historique · Années 70</span>
+            <span class="csw-car-label">912 Targa</span>
+          </div>
+          <div class="csw-card csw-card--featured">
+            <div class="csw-circle" style="background:#0D1B3E; box-shadow:0 0 32px rgba(26,58,122,0.5)"></div>
+            <span class="csw-name">Bleu Nuit métallisé</span>
+            <span class="csw-meta">Série · Catalogue actuel</span>
+            <span class="csw-car-label">964 · 991</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="palette-group">
+        <h3 class="palette-group-label">Couleurs historiques emblématiques</h3>
+        <div class="palette-grid">
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#1E5FA8"></div>
+            <span class="csw-name">Mexico Blue</span>
+            <span class="csw-meta">Années 60–70</span>
+          </div>
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#C94824"></div>
+            <span class="csw-name">Blood Orange</span>
+            <span class="csw-meta">Années 70</span>
+          </div>
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#6A6B3A"></div>
+            <span class="csw-name">Vert Olive</span>
+            <span class="csw-meta">Années 70</span>
+          </div>
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#EEC900"></div>
+            <span class="csw-name">Speed Yellow</span>
+            <span class="csw-meta">Années 90</span>
+          </div>
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#89B33A"></div>
+            <span class="csw-name">Viper Green</span>
+            <span class="csw-meta">Années 70</span>
+          </div>
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#8F5EAF"></div>
+            <span class="csw-name">Amethyst</span>
+            <span class="csw-meta">Années 90</span>
+          </div>
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#4B86C1"></div>
+            <span class="csw-name">Riviera Blue</span>
+            <span class="csw-meta">Années 90</span>
+          </div>
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#3C7240"></div>
+            <span class="csw-name">Irish Green</span>
+            <span class="csw-meta">Années 60–70</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="palette-group">
+        <h3 class="palette-group-label">Paint to Sample — sélection</h3>
+        <div class="palette-grid">
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#3E9FCC"></div>
+            <span class="csw-name">Gulf Blue</span>
+            <span class="csw-meta">PTS · Heritage GT</span>
+          </div>
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#1B2F7A"></div>
+            <span class="csw-name">Voodoo Blue</span>
+            <span class="csw-meta">PTS</span>
+          </div>
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#52A840"></div>
+            <span class="csw-name">Signal Green</span>
+            <span class="csw-meta">PTS</span>
+          </div>
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#C4362A"></div>
+            <span class="csw-name">India Red</span>
+            <span class="csw-meta">PTS</span>
+          </div>
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#F5D020"></div>
+            <span class="csw-name">Signal Yellow</span>
+            <span class="csw-meta">PTS</span>
+          </div>
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#BCBBB5"></div>
+            <span class="csw-name">Chalk</span>
+            <span class="csw-meta">PTS</span>
+          </div>
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#8B7355"></div>
+            <span class="csw-name">Cognac Metallic</span>
+            <span class="csw-meta">PTS</span>
+          </div>
+          <div class="csw-card">
+            <div class="csw-circle" style="background:#D4926E"></div>
+            <span class="csw-name">Salmon Metallic</span>
+            <span class="csw-meta">PTS</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="footer-glass">
+    <div class="footer-inner">
+      <p class="footer-brand">Collection Privée</p>
+      <p class="footer-copy">© 2024 — Tous droits réservés</p>
+      <div class="footer-dots">
+        <span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

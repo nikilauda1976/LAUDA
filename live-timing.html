@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Timing — Le Mans 24H</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+
+  <style>
+    :root {
+      --green: #39d353;
+      --purple: #be57f5;
+      --yellow: #f5c842;
+      --red: #f54242;
+      --blue: #42a0f5;
+      --mono: 'JetBrains Mono', 'Courier New', monospace;
+    }
+    body { background: #04040c; color: var(--text-primary); }
+
+    /* ── TOP STATUS BAR ── */
+    .status-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: calc(var(--nav-h) + .75rem) var(--section-pad-x) .75rem;
+      flex-wrap: wrap; gap: .5rem;
+    }
+    .status-left { display: flex; align-items: center; gap: 1rem; }
+    .live-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: rgba(249,59,59,.12); border: 1px solid rgba(249,59,59,.35);
+      border-radius: 6px; padding: .3rem .8rem;
+      font-size: .6875rem; font-weight: 800; letter-spacing: .12em;
+      text-transform: uppercase; color: #f93b3b;
+    }
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #f93b3b; animation: blink 1.2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+    .demo-note {
+      font-size: .6875rem; color: rgba(255,255,255,.3);
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
+      padding: .3rem .8rem; border-radius: 6px; letter-spacing: .04em;
+    }
+    .session-info {
+      display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+    }
+    .si-item { text-align: right; }
+    .si-label {
+      font-size: .5625rem; font-weight: 600; letter-spacing: .14em;
+      text-transform: uppercase; color: rgba(255,255,255,.3); display: block;
+    }
+    .si-val {
+      font-family: var(--mono); font-size: .875rem; font-weight: 700;
+      color: var(--text-primary); letter-spacing: .02em;
+    }
+    .si-val.green { color: var(--green); }
+    .si-val.yellow { color: var(--yellow); }
+    .si-val.red { color: var(--red); }
+
+    /* ── RACE CLOCK ── */
+    .race-clock-wrap {
+      text-align: center; padding: .5rem var(--section-pad-x) 1rem;
+    }
+    #race-clock {
+      font-family: var(--mono); font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700; letter-spacing: .04em; color: var(--text-primary);
+    }
+    .clock-label {
+      font-size: .6875rem; font-weight: 600; letter-spacing: .18em;
+      text-transform: uppercase; color: rgba(255,255,255,.28); margin-top: .1rem;
+    }
+
+    /* ── FLAG STATUS ── */
+    .flag-bar {
+      margin: 0 var(--section-pad-x) 1rem;
+      padding: .5rem 1.25rem;
+      border-radius: 8px; font-size: .75rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      transition: all .4s;
+    }
+    .flag-bar.green-flag { background: rgba(57,211,83,.1); border: 1px solid rgba(57,211,83,.25); color: var(--green); }
+    .flag-bar.sc { background: rgba(245,200,66,.12); border: 1px solid rgba(245,200,66,.3); color: var(--yellow); }
+    .flag-bar.yellow-flag { background: rgba(245,200,66,.12); border: 1px solid rgba(245,200,66,.3); color: var(--yellow); }
+
+    /* ── MAIN GRID ── */
+    .timing-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1rem;
+      padding: 0 var(--section-pad-x) 3rem;
+      align-items: start;
+    }
+
+    /* ── TIMING TABLE ── */
+    .timing-table-wrap {
+      background: rgba(255,255,255,.02);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 16px; overflow: hidden;
+    }
+    .tt-header {
+      display: grid;
+      grid-template-columns: 36px 36px 1fr 1fr 90px 90px 90px 80px 70px;
+      gap: 0;
+      padding: .5rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      font-size: .5625rem; font-weight: 700; letter-spacing: .14em;
+      text-transform: uppercase; color: rgba(255,255,255,.28);
+    }
+    .tt-row {
+      display: grid;
+      grid-template-columns: 36px 36px 1fr 1fr 90px 90px 90px 80px 70px;
+      gap: 0;
+      padding: .5rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+      align-items: center;
+      cursor: pointer; transition: background .15s;
+    }
+    .tt-row:last-child { border-bottom: none; }
+    .tt-row:hover { background: rgba(255,255,255,.04); }
+    .tt-row.selected { background: rgba(255,255,255,.06); }
+
+    .tt-pos {
+      font-family: var(--mono); font-size: .8125rem; font-weight: 700;
+      color: rgba(255,255,255,.5);
+    }
+    .tt-pos.p1 { color: #f5c842; }
+    .tt-pos.p2 { color: rgba(255,255,255,.7); }
+    .tt-pos.p3 { color: #cd7f32; }
+
+    .tt-num {
+      font-family: var(--mono); font-size: .75rem; font-weight: 700;
+      width: 28px; height: 22px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .tt-team { font-size: .75rem; font-weight: 600; color: var(--text-primary); }
+    .tt-car-type { font-size: .6rem; font-weight: 500; color: rgba(255,255,255,.3); margin-top: 1px; }
+    .tt-gap {
+      font-family: var(--mono); font-size: .75rem; font-weight: 500;
+      color: rgba(255,255,255,.5); text-align: right; padding-right: .5rem;
+    }
+    .tt-interval {
+      font-family: var(--mono); font-size: .75rem; font-weight: 500;
+      color: rgba(255,255,255,.4); text-align: right; padding-right: .5rem;
+    }
+    .tt-lap {
+      font-family: var(--mono); font-size: .75rem; font-weight: 500;
+      text-align: right; padding-right: .5rem;
+    }
+    .tt-lap.purple { color: var(--purple); }
+    .tt-lap.green { color: var(--green); }
+    .tt-lap.yellow { color: var(--yellow); }
+    .tt-lap.normal { color: rgba(255,255,255,.5); }
+
+    .tt-best {
+      font-family: var(--mono); font-size: .75rem; font-weight: 500;
+      color: rgba(255,255,255,.35); text-align: right; padding-right: .5rem;
+    }
+    .tt-laps {
+      font-family: var(--mono); font-size: .75rem; font-weight: 500;
+      color: rgba(255,255,255,.4); text-align: right;
+    }
+    .tt-sectors {
+      display: flex; gap: 2px; align-items: center;
+    }
+    .sector-dot {
+      width: 10px; height: 10px; border-radius: 2px;
+      transition: background .3s;
+    }
+
+    /* ── SIDE PANEL ── */
+    .side-panel { display: flex; flex-direction: column; gap: .75rem; }
+
+    /* Circuit mini map */
+    .mini-circuit {
+      background: rgba(255,255,255,.02);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 14px; padding: 1rem;
+    }
+    .mini-circuit-title {
+      font-size: .5625rem; font-weight: 700; letter-spacing: .16em;
+      text-transform: uppercase; color: rgba(255,255,255,.3); margin-bottom: .75rem;
+    }
+    .mini-circuit svg { width: 100%; height: auto; display: block; }
+
+    /* Weather */
+    .weather-card {
+      background: rgba(255,255,255,.02);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 14px; padding: 1rem 1.25rem;
+    }
+    .weather-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: .35rem 0; border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .weather-row:last-child { border-bottom: none; }
+    .weather-key { font-size: .6875rem; color: rgba(255,255,255,.35); }
+    .weather-val {
+      font-family: var(--mono); font-size: .8125rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Selected car detail */
+    .car-detail {
+      background: rgba(255,255,255,.02);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 14px; padding: 1rem 1.25rem;
+    }
+    .car-detail-title {
+      font-size: .5625rem; font-weight: 700; letter-spacing: .16em;
+      text-transform: uppercase; color: rgba(255,255,255,.3); margin-bottom: .75rem;
+    }
+    .cd-num {
+      font-family: var(--mono); font-size: 2.5rem; font-weight: 900;
+      letter-spacing: -.04em; line-height: 1; margin-bottom: .2rem;
+    }
+    .cd-team { font-size: .875rem; font-weight: 700; color: var(--text-primary); margin-bottom: .1rem; }
+    .cd-car { font-size: .75rem; color: rgba(255,255,255,.4); margin-bottom: .75rem; }
+    .cd-drivers { font-size: .75rem; color: rgba(255,255,255,.5); line-height: 1.6; margin-bottom: .75rem; }
+
+    .sector-bars { display: flex; gap: 4px; margin-bottom: .75rem; }
+    .sector-bar {
+      flex: 1; height: 6px; border-radius: 3px;
+      transition: background .4s;
+    }
+
+    .cd-stats { display: flex; flex-direction: column; gap: .4rem; }
+    .cd-stat {
+      display: flex; justify-content: space-between;
+      font-size: .75rem; padding: .3rem 0;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .cd-stat:last-child { border-bottom: none; }
+    .cd-stat-key { color: rgba(255,255,255,.35); }
+    .cd-stat-val { font-family: var(--mono); font-weight: 600; color: var(--text-primary); }
+
+    /* API Connection status */
+    .api-status {
+      position: fixed; bottom: 1rem; right: 1rem;
+      background: rgba(4,4,12,.9); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px; padding: .5rem 1rem;
+      font-size: .6875rem; display: flex; align-items: center; gap: .5rem;
+      color: rgba(255,255,255,.4); z-index: 100;
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    }
+    .api-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+    @media (max-width: 1024px) {
+      .timing-layout { grid-template-columns: 1fr; }
+      .side-panel { flex-direction: row; flex-wrap: wrap; }
+      .mini-circuit, .weather-card, .car-detail { flex: 1; min-width: 240px; }
+      .tt-header, .tt-row {
+        grid-template-columns: 28px 28px 1fr 80px 80px 60px;
+      }
+      .tt-interval, .tt-best, .tt-laps { display: none; }
+    }
+    @media (max-width: 600px) {
+      .status-bar { padding-top: calc(var(--nav-h) + .5rem); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ NAV ═══ -->
+  <nav class="nav-glass" id="nav">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-dot"></span>
+      Collection
+    </a>
+    <ul class="nav-links">
+      <li><a href="catalogue.html">Catalogue</a></li>
+      <li><a href="lemans-classique.html">Le Mans Classique</a></li>
+      <li class="nav-sep"></li>
+      <li><a href="live-timing.html" style="color:var(--text-primary)">Live Timing</a></li>
+    </ul>
+  </nav>
+
+  <!-- ═══ STATUS BAR ═══ -->
+  <div class="status-bar">
+    <div class="status-left">
+      <div class="live-badge"><span class="live-dot"></span>Live</div>
+      <div class="demo-note">⚙ MODE DÉMO — données simulées · <a href="#" id="api-info-link" style="color:rgba(255,255,255,.45);text-decoration:none">API info</a></div>
+    </div>
+    <div class="session-info">
+      <div class="si-item">
+        <span class="si-label">Session</span>
+        <span class="si-val">24H du Mans 2026</span>
+      </div>
+      <div class="si-item">
+        <span class="si-label">Tour en cours</span>
+        <span id="current-lap" class="si-val">—</span>
+      </div>
+      <div class="si-item">
+        <span class="si-label">Météo</span>
+        <span class="si-val green">✓ Sec · 22°C</span>
+      </div>
+      <div class="si-item">
+        <span class="si-label">Flag</span>
+        <span id="flag-label" class="si-val green">Green</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Race clock -->
+  <div class="race-clock-wrap">
+    <div id="race-clock">00:00:00</div>
+    <div class="clock-label">Temps écoulé</div>
+  </div>
+
+  <!-- Flag bar -->
+  <div id="flag-bar" class="flag-bar green-flag">🟢 &nbsp;Green Flag — Course en cours</div>
+
+  <!-- ═══ MAIN GRID ═══ -->
+  <div class="timing-layout">
+
+    <!-- ── TIMING TABLE ── -->
+    <div class="timing-table-wrap">
+      <div class="tt-header">
+        <span>POS</span>
+        <span>#</span>
+        <span>ÉQUIPE</span>
+        <span>ÉCART</span>
+        <span>INTERVALLE</span>
+        <span>DERNIER T.</span>
+        <span>MEILLEUR</span>
+        <span>TOURS</span>
+        <span>S1 S2 S3</span>
+      </div>
+      <div id="timing-body"></div>
+    </div>
+
+    <!-- ── SIDE PANEL ── -->
+    <div class="side-panel">
+
+      <!-- Mini circuit -->
+      <div class="mini-circuit">
+        <div class="mini-circuit-title">Circuit de la Sarthe · Positions</div>
+        <svg viewBox="20 30 550 430" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <path id="mc-track" d="
+              M 86,378
+              L 80,118
+              C 80,100 92,84 114,76
+              C 142,66 190,57 248,53
+              C 302,49 360,51 412,57
+              C 444,61 466,77 474,110
+              L 474,188
+              L 459,203
+              L 474,214
+              L 474,292
+              L 459,307
+              L 474,318
+              C 474,350 468,370 448,382
+              C 428,394 400,400 368,400
+              C 345,400 325,408 308,415
+              C 290,423 271,425 255,416
+              C 237,407 220,402 204,406
+              C 187,410 171,418 156,420
+              C 140,421 125,414 115,408
+              L 105,415
+              L 95,408
+              L 87,400
+              L 86,390
+              L 86,378
+            "/>
+          </defs>
+          <!-- Glow -->
+          <use href="#mc-track" stroke="rgba(255,107,53,0.08)" stroke-width="22" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+          <!-- Mulsanne highlight -->
+          <path d="M 474,110 L 474,188 L 459,203 L 474,214 L 474,292 L 459,307 L 474,318 C 474,350 468,370 448,382"
+                stroke="rgba(232,98,42,0.45)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <!-- Main trace -->
+          <use href="#mc-track" stroke="rgba(255,255,255,0.65)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+          <!-- Mulsanne chicanes -->
+          <path d="M 474,188 L 459,203 L 474,214" stroke="rgba(255,210,70,0.85)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M 474,292 L 459,307 L 474,318" stroke="rgba(255,210,70,0.85)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <!-- Ford chicanes -->
+          <path d="M 115,408 L 105,415 L 95,408 L 87,400" stroke="rgba(255,210,70,0.7)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <!-- Start/Finish line -->
+          <line x1="76" y1="368" x2="96" y2="368" stroke="#E8622A" stroke-width="3"/>
+          <circle cx="86" cy="378" r="5" fill="#E8622A"/>
+          <!-- Key labels -->
+          <text x="98" y="382" fill="rgba(255,255,255,.55)" font-size="11" font-family="Inter,sans-serif" font-weight="600">S/F</text>
+          <text x="67" y="250" fill="rgba(255,255,255,.3)" font-size="10" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle" writing-mode="vertical-rl">PIT STRAIGHT</text>
+          <text x="496" y="250" fill="rgba(232,98,42,.45)" font-size="10" font-family="Inter,sans-serif" font-weight="700" text-anchor="middle" writing-mode="vertical-rl">HUNAUDIÈRES</text>
+          <text x="255" y="444" fill="rgba(255,255,255,.3)" font-size="9" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">ARNAGE</text>
+          <text x="153" y="440" fill="rgba(232,98,42,.5)" font-size="9" font-family="Inter,sans-serif" font-weight="700" text-anchor="middle">PORSCHE</text>
+          <!-- Cars drawn dynamically -->
+          <g id="circuit-cars"></g>
+        </svg>
+      </div>
+
+      <!-- Weather -->
+      <div class="weather-card">
+        <div style="font-size:.5625rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:.75rem">⛅ Météo · Le Mans</div>
+        <div class="weather-row">
+          <span class="weather-key">Temp. air</span>
+          <span class="weather-val">22.4 °C</span>
+        </div>
+        <div class="weather-row">
+          <span class="weather-key">Temp. piste</span>
+          <span class="weather-val">34.1 °C</span>
+        </div>
+        <div class="weather-row">
+          <span class="weather-key">Humidité</span>
+          <span class="weather-val">58 %</span>
+        </div>
+        <div class="weather-row">
+          <span class="weather-key">Vent</span>
+          <span class="weather-val">12 km/h SO</span>
+        </div>
+        <div class="weather-row">
+          <span class="weather-key">Conditions</span>
+          <span class="weather-val" style="color:var(--green)">Sec</span>
+        </div>
+      </div>
+
+      <!-- Car detail -->
+      <div class="car-detail">
+        <div class="car-detail-title">Voiture sélectionnée</div>
+        <div id="car-detail-content" style="color:rgba(255,255,255,.3);font-size:.8125rem">
+          Cliquer sur une voiture pour les détails
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- API status badge -->
+  <div class="api-status">
+    <div class="api-dot" style="background:var(--yellow)"></div>
+    <span>Démo · Pas de connexion API active</span>
+  </div>
+
+  <!-- API Info modal -->
+  <div id="api-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+    <div style="background:#0d0d1e;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:2rem;max-width:520px;width:calc(100% - 2rem);position:relative">
+      <button onclick="document.getElementById('api-modal').style.display='none'" style="position:absolute;top:1rem;right:1rem;color:rgba(255,255,255,.4);font-size:1.25rem">✕</button>
+      <h3 style="font-size:1.125rem;font-weight:800;margin-bottom:.75rem">Connexion API — État</h3>
+      <div style="background:rgba(255,200,66,.08);border:1px solid rgba(255,200,66,.2);border-radius:10px;padding:1rem;margin-bottom:1rem">
+        <p style="font-size:.8125rem;color:rgba(255,200,66,.9);font-weight:600;margin-bottom:.4rem">⚠ Aucune API publique disponible</p>
+        <p style="font-size:.75rem;color:rgba(255,255,255,.5);line-height:1.6">Le timing officiel du Mans (24H WEC &amp; Le Mans Classique) est géré par <strong style="color:rgba(255,255,255,.7)">Al Kamel Systems</strong> — système propriétaire fermé, sans API publique documentée.</p>
+      </div>
+      <p style="font-size:.75rem;color:rgba(255,255,255,.5);line-height:1.8;margin-bottom:1rem">
+        <strong style="color:var(--text-primary)">Ce qui est accessible :</strong><br>
+        → <code style="color:var(--green);background:rgba(57,211,83,.1);padding:1px 4px;border-radius:3px">https://livetiming.fiawec.com/</code> — timing officiel WEC (navigateur uniquement)<br>
+        → <code style="color:var(--green);background:rgba(57,211,83,.1);padding:1px 4px;border-radius:3px">https://fiawec.alkamelsystems.com/</code> — résultats PDF<br>
+        → WebSocket inspecté pendant la course (endpoints changeants)<br>
+      </p>
+      <p style="font-size:.75rem;color:rgba(255,255,255,.5);line-height:1.8">
+        <strong style="color:var(--text-primary)">Pour une vraie intégration :</strong><br>
+        → Contacter Al Kamel Systems pour un accès API développeur<br>
+        → Ou utiliser un proxy serveur (Node.js) qui intercepte les données WS pendant la course
+      </p>
+      <button onclick="document.getElementById('api-modal').style.display='none'" style="margin-top:1.25rem;width:100%;padding:.75rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--text-primary);font-size:.875rem;font-weight:600;cursor:pointer">Compris</button>
+    </div>
+  </div>
+
+
+  <script>
+  /* ═══════════════════════════════════════════════════════
+     LIVE TIMING — DEMO ENGINE
+     Structure prête pour brancher une API réelle :
+     Replace fetchRaceData() with WebSocket/fetch calls
+  ═══════════════════════════════════════════════════════ */
+
+  /* ── CAR DATA (Hypercar field realistic Le Mans 2026) ── */
+  const CARS = [
+    { num:'5',  color:'#FF2D2D', team:'Porsche Penske Motorsport', car:'Porsche 963', drivers:'Campbell / Christensen / Makowiecki', cls:'Hypercar' },
+    { num:'6',  color:'#FF2D2D', team:'Porsche Penske Motorsport', car:'Porsche 963', drivers:'Jaminet / Nasr / Tandy', cls:'Hypercar' },
+    { num:'93', color:'#E8622A', team:'Proton Competition', car:'Porsche 963', drivers:'Andlauer / Malykhin / Bachler', cls:'Hypercar' },
+    { num:'7',  color:'#BE0000', team:'Toyota Gazoo Racing', car:'GR010 Hybrid', drivers:'Conway / Kobayashi / López', cls:'Hypercar' },
+    { num:'8',  color:'#BE0000', team:'Toyota Gazoo Racing', car:'GR010 Hybrid', drivers:'Buemi / Hirakawa / Hartley', cls:'Hypercar' },
+    { num:'51', color:'#ED2027', team:'Ferrari AF Corse', car:'Ferrari 499P', drivers:'Pier Guidi / Calado / Giovinazzi', cls:'Hypercar' },
+    { num:'50', color:'#ED2027', team:'Ferrari AF Corse', car:'Ferrari 499P', drivers:'Fuoco / Molina / Nielsen', cls:'Hypercar' },
+    { num:'2',  color:'#1A1A70', team:'Cadillac Racing', car:'V-Series.R', drivers:'Bamber / Bourdais / Westbrook', cls:'Hypercar' },
+    { num:'35', color:'#0057A8', team:'Alpine Endurance Team', car:'Alpine A424', drivers:'Lapierre / Menezes / Ragues', cls:'Hypercar' },
+    { num:'20', color:'#0A0A0A', team:'BMW M Team RLL', car:'M Hybrid V8', drivers:'Farfus / Yelloly / van der Linde', cls:'Hypercar' },
+    { num:'91', color:'#FF2D2D', team:'Porsche GT Team', car:'911 GT3 R', drivers:'Lietz / Sturm / Olsen', cls:'LMGT3' },
+    { num:'92', color:'#FF2D2D', team:'Porsche GT Team', car:'911 GT3 R', drivers:'Estre / Christensen / Gimeno', cls:'LMGT3' },
+    { num:'55', color:'#ED2027', team:'Spirit of Race', car:'Ferrari 296 GT3', drivers:'Flohr / Castellacci / Cressoni', cls:'LMGT3' },
+    { num:'82', color:'#36A2D7', team:'TF Sport', car:'Aston Martin V8 Vantage', drivers:'Turner / Adam / Gunn', cls:'LMGT3' },
+  ];
+
+  /* ── RACE STATE ── */
+  let raceState = [];
+  let elapsed = 0; // seconds elapsed in race
+  let totalLaps = 200;
+  let selectedCar = null;
+
+  const BASE_LAPTIMES = {
+    'Hypercar': 210.5,  // ~3:30.5 base
+    'LMGT3':    225.0,  // ~3:45.0 base
+  };
+
+  function fmtTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = (s % 60).toFixed(3).padStart(6,'0');
+    return `${m}:${sec}`;
+  }
+
+  function fmtRaceTime(s) {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = Math.floor(s % 60);
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  }
+
+  function randBetween(a, b) { return a + Math.random() * (b - a); }
+
+  /* ── INIT RACE ── */
+  function initRace() {
+    raceState = CARS.map((car, i) => {
+      const base = BASE_LAPTIMES[car.cls];
+      const variation = randBetween(-2, 2);
+      const bestLap = base + variation;
+      return {
+        ...car,
+        pos: i + 1,
+        gap: i === 0 ? 'LEADER' : null,
+        interval: null,
+        laps: Math.max(1, 80 - i * 2 + Math.floor(randBetween(-3, 3))),
+        lastLap: bestLap + randBetween(0, 3),
+        bestLap: bestLap,
+        sectors: [
+          randBetween(62, 68),
+          randBetween(55, 62),
+          randBetween(78, 90),
+        ],
+        sectorColors: ['yellow','yellow','yellow'],
+        totalTime: 0,
+        pit: false,
+        lapVariance: variation,
+      };
+    });
+    computeGaps();
+  }
+
+  function computeGaps() {
+    // Sort by laps desc then by totalTime asc
+    raceState.sort((a,b) => {
+      if (b.laps !== a.laps) return b.laps - a.laps;
+      return a.totalTime - b.totalTime;
+    });
+
+    raceState.forEach((car, i) => {
+      car.pos = i + 1;
+      if (i === 0) {
+        car.gap = 'LEADER';
+        car.interval = '—';
+      } else {
+        const leaderTime = raceState[0].totalTime + (raceState[0].laps - car.laps) * BASE_LAPTIMES[car.cls];
+        const myTime = car.totalTime;
+        const gapSec = leaderTime - myTime;
+        car.gap = gapSec > 0 ? `+${gapSec.toFixed(3)}` : `+${Math.abs(gapSec).toFixed(3)}`;
+
+        const prevTime = raceState[i-1].totalTime + (raceState[i-1].laps - car.laps) * BASE_LAPTIMES[car.cls];
+        const intSec = prevTime - myTime;
+        car.interval = intSec > 0 ? `+${intSec.toFixed(3)}` : `+${Math.abs(intSec).toFixed(3)}`;
+      }
+    });
+  }
+
+  /* ── UPDATE TICK (called every ~2s) ── */
+  function updateRace() {
+    elapsed += 2;
+
+    raceState.forEach(car => {
+      // Probabilistic lap completion
+      const lapTime = car.bestLap + randBetween(-0.5, 4) + (car.pit ? 45 : 0);
+
+      // Update total time (simplified)
+      car.totalTime += 2;
+
+      // Random lap completion
+      if (Math.random() < 2 / lapTime) {
+        car.laps += 1;
+        car.lastLap = lapTime;
+
+        // Update best lap
+        if (lapTime < car.bestLap) {
+          car.bestLap = lapTime;
+        }
+
+        // Random sector colors
+        car.sectorColors = car.sectorColors.map(() => {
+          const r = Math.random();
+          if (r < 0.05) return 'purple';
+          if (r < 0.4) return 'green';
+          if (r < 0.75) return 'yellow';
+          return 'normal';
+        });
+
+        // Random pit stop
+        car.pit = Math.random() < 0.02;
+      }
+    });
+
+    computeGaps();
+    renderTable();
+    updateClock();
+    updateCurrentLap();
+    updateCircuitPositions();
+    if (selectedCar) updateCarDetail(selectedCar);
+  }
+
+  /* ── RENDER TABLE ── */
+  function renderTable() {
+    const body = document.getElementById('timing-body');
+    body.innerHTML = '';
+
+    raceState.forEach(car => {
+      const posClass = car.pos === 1 ? 'p1' : car.pos === 2 ? 'p2' : car.pos === 3 ? 'p3' : '';
+
+      const sectorColors = car.sectorColors || ['yellow','yellow','yellow'];
+      const sColorMap = {
+        purple: '#be57f5',
+        green: '#39d353',
+        yellow: '#f5c842',
+        normal: 'rgba(255,255,255,0.15)',
+      };
+
+      const lapColor = car.sectorColors.every(s => s === 'purple') ? 'purple'
+        : car.sectorColors.some(s => s === 'purple') ? 'green'
+        : car.sectorColors.some(s => s === 'green') ? 'green'
+        : 'normal';
+
+      const row = document.createElement('div');
+      row.className = 'tt-row' + (selectedCar === car.num ? ' selected' : '');
+      row.innerHTML = `
+        <span class="tt-pos ${posClass}">${car.pos}</span>
+        <span class="tt-num" style="background:${car.color}22;color:${car.color};border:1px solid ${car.color}44">${car.num}</span>
+        <div>
+          <div class="tt-team">${car.team}</div>
+          <div class="tt-car-type">${car.cls} · ${car.car}</div>
+        </div>
+        <span class="tt-gap">${car.gap}</span>
+        <span class="tt-interval">${car.interval}</span>
+        <span class="tt-lap ${lapColor}">${car.pit ? '🔧 PIT' : fmtTime(car.lastLap)}</span>
+        <span class="tt-best">${fmtTime(car.bestLap)}</span>
+        <span class="tt-laps">${car.laps}</span>
+        <div class="tt-sectors">
+          ${sectorColors.map(c => `<div class="sector-dot" style="background:${sColorMap[c]}"></div>`).join('')}
+        </div>
+      `;
+      row.addEventListener('click', () => {
+        selectedCar = car.num;
+        updateCarDetail(car.num);
+        document.querySelectorAll('.tt-row').forEach(r => r.classList.remove('selected'));
+        row.classList.add('selected');
+      });
+      body.appendChild(row);
+    });
+  }
+
+  function updateCarDetail(carNum) {
+    const car = raceState.find(c => c.num === carNum);
+    if (!car) return;
+    const sColorMap = { purple:'#be57f5', green:'#39d353', yellow:'#f5c842', normal:'rgba(255,255,255,0.15)' };
+    const content = document.getElementById('car-detail-content');
+    content.innerHTML = `
+      <div class="cd-num" style="color:${car.color}">#${car.num}</div>
+      <div class="cd-team">${car.team}</div>
+      <div class="cd-car">${car.car} · ${car.cls}</div>
+      <div class="cd-drivers">🧑‍✈️ ${car.drivers.replace(/ \/ /g, '<br>🧑‍✈️ ')}</div>
+      <div class="sector-bars">
+        ${(car.sectorColors || []).map((c,i) => `<div class="sector-bar" style="background:${sColorMap[c]}" title="S${i+1}"></div>`).join('')}
+      </div>
+      <div class="cd-stats">
+        <div class="cd-stat"><span class="cd-stat-key">Position</span><span class="cd-stat-val">P${car.pos}</span></div>
+        <div class="cd-stat"><span class="cd-stat-key">Écart leader</span><span class="cd-stat-val">${car.gap}</span></div>
+        <div class="cd-stat"><span class="cd-stat-key">Dernier tour</span><span class="cd-stat-val">${car.pit ? 'PIT STOP' : fmtTime(car.lastLap)}</span></div>
+        <div class="cd-stat"><span class="cd-stat-key">Meilleur tour</span><span class="cd-stat-val">${fmtTime(car.bestLap)}</span></div>
+        <div class="cd-stat"><span class="cd-stat-key">Tours complétés</span><span class="cd-stat-val">${car.laps}</span></div>
+        <div class="cd-stat"><span class="cd-stat-key">Statut</span><span class="cd-stat-val" style="color:${car.pit ? 'var(--yellow)' : 'var(--green)'}">${car.pit ? '🔧 Pit stop' : '🟢 En course'}</span></div>
+      </div>
+    `;
+  }
+
+  function updateClock() {
+    document.getElementById('race-clock').textContent = fmtRaceTime(elapsed);
+  }
+
+  function updateCurrentLap() {
+    if (raceState.length > 0) {
+      document.getElementById('current-lap').textContent = `T.${raceState[0].laps}`;
+    }
+  }
+
+  /* Circuit positions mapped to real Circuit de la Sarthe coordinates (viewBox 20 30 550 430) */
+  const TRACK_POSITIONS = [
+    [86,378],   // Start/Finish
+    [82,290],   // Mid pit straight
+    [80,175],   // Upper pit straight / Dunlop
+    [180,60],   // Esses Forêt
+    [412,57],   // Tertre Rouge
+    [474,150],  // Upper Hunaudières
+    [474,252],  // Mid Hunaudières / Chicane 1
+    [466,340],  // Lower Hunaudières / Chicane 2
+    [390,398],  // Indianapolis
+    [156,420],  // Porsche Curves
+  ];
+
+  function updateCircuitPositions() {
+    const g = document.getElementById('circuit-cars');
+    g.innerHTML = '';
+    raceState.slice(0, 10).forEach((car, i) => {
+      const [x, y] = TRACK_POSITIONS[i % TRACK_POSITIONS.length];
+      const jx = randBetween(-3, 3);
+      const jy = randBetween(-3, 3);
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', x + jx);
+      dot.setAttribute('cy', y + jy);
+      dot.setAttribute('r', '5');
+      dot.setAttribute('fill', car.color);
+      dot.style.filter = `drop-shadow(0 0 4px ${car.color})`;
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', x + jx + 7);
+      label.setAttribute('y', y + jy + 4);
+      label.setAttribute('fill', 'rgba(255,255,255,.6)');
+      label.setAttribute('font-size', '7');
+      label.setAttribute('font-family', 'JetBrains Mono, monospace');
+      label.textContent = car.num;
+      g.appendChild(dot);
+      g.appendChild(label);
+    });
+  }
+
+  /* ── API CONNECTION FRAMEWORK ──
+     To connect a real API, replace this with:
+
+     Option A — WebSocket (WEC during race weekend):
+     const ws = new WebSocket('wss://livetiming.fiawec.com/timing');
+     ws.onmessage = (e) => { parseAlKamelData(JSON.parse(e.data)); renderTable(); };
+
+     Option B — Polling fallback:
+     setInterval(async () => {
+       const r = await fetch('https://your-proxy.com/api/wec-timing');
+       const data = await r.json();
+       parseAndUpdate(data);
+     }, 5000);
+
+     Note: Direct browser connection to fiawec.com will fail due to CORS.
+     A server-side proxy (Node.js/Vercel function) is required.
+  ── */
+
+  /* ── BOOT ── */
+  document.getElementById('api-info-link').addEventListener('click', e => {
+    e.preventDefault();
+    document.getElementById('api-modal').style.display = 'flex';
+  });
+
+  initRace();
+  renderTable();
+  updateClock();
+  updateCurrentLap();
+  updateCircuitPositions();
+
+  // Update every 2 seconds (realistic live timing cadence)
+  setInterval(updateRace, 2000);
+
+  // Occasional flag changes
+  setInterval(() => {
+    const flags = ['green','green','green','green','sc','yellow'];
+    const flag = flags[Math.floor(Math.random() * flags.length)];
+    const bar = document.getElementById('flag-bar');
+    const label = document.getElementById('flag-label');
+    if (flag === 'green') {
+      bar.className = 'flag-bar green-flag';
+      bar.innerHTML = '🟢 &nbsp;Green Flag — Course en cours';
+      label.textContent = 'Green';
+      label.className = 'si-val green';
+    } else if (flag === 'sc') {
+      bar.className = 'flag-bar sc';
+      bar.innerHTML = '🟡 &nbsp;Safety Car — Déployée sur la piste';
+      label.textContent = 'SC';
+      label.className = 'si-val yellow';
+    } else {
+      bar.className = 'flag-bar yellow-flag';
+      bar.innerHTML = '🟡 &nbsp;Yellow Flag — Incident en secteur';
+      label.textContent = 'Yellow';
+      label.className = 'si-val yellow';
+    }
+  }, 45000 + Math.random() * 30000);
+
+  </script>
+</body>
+</html>
