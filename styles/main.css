@@ -450,6 +450,28 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
   background: var(--glass-border-hi);
 }
 
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-link {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 0.25s var(--ease-smooth);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.footer-link:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .footer-dots span:nth-child(1) { background: #E8622A; box-shadow: 0 0 8px #E8622A88; }
 .footer-dots span:nth-child(2),
 .footer-dots span:nth-child(3),
