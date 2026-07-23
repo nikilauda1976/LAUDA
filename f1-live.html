@@ -14,6 +14,7 @@
       --f1-green: #39d353;
       --f1-yellow: #f5c842;
       --f1-red: #f54242;
+      --f1-blue: #42a0f5;
       --mono: 'JetBrains Mono', 'Courier New', monospace;
     }
     body { background: #08080f; }
@@ -37,6 +38,22 @@
     .f1-credit a { color: #D4AF37; text-decoration: none; }
     .f1-credit a:hover { text-decoration: underline; }
 
+    /* ── TAB NAV ── */
+    .f1-tabs {
+      display: flex; gap: .35rem; flex-wrap: wrap;
+      padding: 0 var(--section-pad-x) 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .f1-tab-btn {
+      padding: .5rem 1.1rem; border-radius: 8px;
+      font-size: .8125rem; font-weight: 600; letter-spacing: .02em;
+      color: rgba(255,255,255,.45); background: transparent;
+      border: none; cursor: pointer; transition: all .2s;
+    }
+    .f1-tab-btn.active, .f1-tab-btn:hover { color: var(--text-primary); background: rgba(255,255,255,.07); }
+    .f1-panel { padding: 1.75rem var(--section-pad-x) 4rem; }
+    .f1-panel.hidden { display: none; }
+
     /* ── CONTROLS ── */
     .f1-controls {
       display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
@@ -46,7 +63,7 @@
       background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
       color: var(--text-primary); font-family: var(--font-sans); font-size: .8125rem;
       font-weight: 600; padding: .55rem 1rem; border-radius: 10px; cursor: pointer;
-      min-width: 260px; max-width: 100%;
+      min-width: 220px; max-width: 100%;
     }
     .f1-select:focus { outline: 1px solid #D4AF37; }
     .f1-live-badge {
@@ -59,12 +76,14 @@
     .f1-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #f93b3b; animation: f1blink 1.2s ease-in-out infinite; }
     @keyframes f1blink { 0%,100%{opacity:1} 50%{opacity:.2} }
     .f1-updated { font-size: .6875rem; color: rgba(255,255,255,.3); font-family: var(--mono); }
-    .f1-refresh-btn {
+    .f1-refresh-btn, .f1-action-btn {
       background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
       color: rgba(255,255,255,.6); padding: .5rem .9rem; border-radius: 10px;
       font-size: .75rem; font-weight: 600; cursor: pointer; transition: background .2s;
     }
-    .f1-refresh-btn:hover { background: rgba(255,255,255,.1); color: var(--text-primary); }
+    .f1-refresh-btn:hover, .f1-action-btn:hover { background: rgba(255,255,255,.1); color: var(--text-primary); }
+    .f1-action-btn.primary { background: rgba(212,175,55,.15); border-color: rgba(212,175,55,.4); color: #D4AF37; }
+    .f1-action-btn.primary:hover { background: rgba(212,175,55,.25); }
 
     /* ── SESSION CARD ── */
     .f1-session-card {
@@ -81,7 +100,6 @@
     .f1-sc-stat-val { font-family: var(--mono); font-size: .875rem; font-weight: 700; color: var(--text-primary); }
 
     /* ── STANDINGS LIST ── */
-    .f1-standings { padding: 0 var(--section-pad-x) 4rem; }
     .f1-row {
       display: grid;
       grid-template-columns: 44px 40px 1fr auto auto;
@@ -109,7 +127,7 @@
 
     .f1-empty {
       text-align: center; padding: 3rem 1rem; color: rgba(255,255,255,.35);
-      font-size: .875rem;
+      font-size: .875rem; line-height: 1.6;
     }
     .f1-skeleton {
       height: 58px; border-radius: 10px; margin-bottom: .5rem;
@@ -118,10 +136,67 @@
     }
     @keyframes f1shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
+    /* ── LAPS TABLE ── */
+    .f1-laps-table { width: 100%; border-collapse: collapse; font-size: .8125rem; }
+    .f1-laps-table th {
+      text-align: left; font-size: .625rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: rgba(255,255,255,.3);
+      padding: .5rem .75rem; border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .f1-laps-table td {
+      padding: .55rem .75rem; border-bottom: 1px solid rgba(255,255,255,.04);
+      color: var(--text-primary); font-family: var(--mono);
+    }
+    .f1-laps-table tr:hover td { background: rgba(255,255,255,.03); }
+    .f1-laps-table tr.best td { color: var(--f1-green); }
+    .f1-laps-table tr.selectable { cursor: pointer; }
+    .f1-laps-table tr.picked td { background: rgba(212,175,55,.08); }
+
+    /* ── TELEMETRY CHARTS ── */
+    .f1-telemetry-charts { display: flex; flex-direction: column; gap: 1.25rem; }
+    .f1-chart-card {
+      background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 14px; padding: 1rem 1.25rem;
+    }
+    .f1-chart-label {
+      font-size: .625rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      color: rgba(255,255,255,.35); margin-bottom: .5rem; display: flex; justify-content: space-between;
+    }
+    .f1-chart-val { color: var(--text-primary); font-family: var(--mono); }
+    .f1-drs-strip { display: flex; gap: 1px; height: 22px; border-radius: 4px; overflow: hidden; }
+    .f1-drs-seg { flex: 1; }
+
+    /* ── DRIVER GRID ── */
+    .f1-driver-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1px; background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.07); border-radius: 16px; overflow: hidden;
+    }
+    .f1-driver-card {
+      background: #0a0a18; padding: 1.25rem; display: flex; align-items: center; gap: 1rem;
+      border-left: 3px solid var(--team-color, #888);
+    }
+    .f1-driver-card img {
+      width: 52px; height: 52px; border-radius: 50%; object-fit: cover;
+      background: rgba(255,255,255,.06); flex-shrink: 0;
+    }
+    .f1-driver-card .num { font-family: var(--mono); font-size: .6875rem; color: rgba(255,255,255,.3); }
+
+    /* ── HISTORY TABLE ── */
+    .f1-history-table { width: 100%; border-collapse: collapse; font-size: .8125rem; }
+    .f1-history-table th {
+      text-align: left; font-size: .625rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: rgba(255,255,255,.3);
+      padding: .5rem .75rem; border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .f1-history-table td { padding: .6rem .75rem; border-bottom: 1px solid rgba(255,255,255,.04); color: var(--text-primary); }
+    .f1-history-pos { font-family: var(--mono); font-weight: 800; }
+
     @media (max-width: 640px) {
       .f1-row { grid-template-columns: 32px 34px 1fr auto; }
       .f1-num { display: none; }
       .f1-sc-stat { margin-left: 0; text-align: left; }
+      .f1-laps-table, .f1-history-table { font-size: .75rem; }
     }
   </style>
 </head>
@@ -146,18 +221,15 @@
   <header class="f1-hero">
     <p class="f1-eyebrow">Données temps réel · Formula 1</p>
     <h1 class="f1-title">F1 Live</h1>
-    <p class="f1-subtitle">Classement, écarts et informations de course en direct.</p>
+    <p class="f1-subtitle">Classement, tours, télémétrie, pilotes et historique — données réelles.</p>
     <p class="f1-credit">Données fournies par <a href="https://api.openf1.org" target="_blank" rel="noopener">OpenF1</a> — API open-source : <a href="https://github.com/br-g/openf1" target="_blank" rel="noopener">github.com/br-g/openf1</a></p>
   </header>
 
-  <!-- ═══ CONTROLS ═══ -->
+  <!-- ═══ SESSION SELECT ═══ -->
   <div class="f1-controls">
     <select id="session-select" class="f1-select">
       <option value="">Chargement des sessions…</option>
     </select>
-    <div class="f1-live-badge"><span class="f1-live-dot"></span>Auto-refresh</div>
-    <span class="f1-updated" id="last-updated">—</span>
-    <button class="f1-refresh-btn" id="refresh-btn">↻ Rafraîchir</button>
   </div>
 
   <!-- ═══ SESSION INFO ═══ -->
@@ -173,8 +245,22 @@
     </div>
   </div>
 
-  <!-- ═══ STANDINGS ═══ -->
-  <section class="f1-standings">
+  <!-- ═══ TABS ═══ -->
+  <nav class="f1-tabs">
+    <button class="f1-tab-btn active" data-tab="classement">Classement</button>
+    <button class="f1-tab-btn" data-tab="tours">Tours &amp; Vitesses</button>
+    <button class="f1-tab-btn" data-tab="telemetrie">Télémétrie</button>
+    <button class="f1-tab-btn" data-tab="pilotes">Pilotes</button>
+    <button class="f1-tab-btn" data-tab="historique">Historique</button>
+  </nav>
+
+  <!-- ═══ CLASSEMENT ═══ -->
+  <section id="panel-classement" class="f1-panel">
+    <div class="f1-controls" style="padding:0 0 1.25rem">
+      <div class="f1-live-badge"><span class="f1-live-dot"></span>Auto-refresh</div>
+      <span class="f1-updated" id="last-updated">—</span>
+      <button class="f1-refresh-btn" id="refresh-btn">↻ Rafraîchir</button>
+    </div>
     <div id="standings-list">
       <div class="f1-skeleton"></div>
       <div class="f1-skeleton"></div>
@@ -182,6 +268,39 @@
       <div class="f1-skeleton"></div>
       <div class="f1-skeleton"></div>
     </div>
+  </section>
+
+  <!-- ═══ TOURS & VITESSES ═══ -->
+  <section id="panel-tours" class="f1-panel hidden">
+    <div class="f1-controls" style="padding:0 0 1.25rem">
+      <select id="laps-driver-select" class="f1-select"><option value="">Choisir un pilote…</option></select>
+      <button class="f1-action-btn" id="laps-load-btn">Charger les tours</button>
+    </div>
+    <div id="laps-content"><div class="f1-empty">Choisissez un pilote pour afficher ses temps au tour, secteurs et vitesses de pointe.</div></div>
+  </section>
+
+  <!-- ═══ TÉLÉMÉTRIE ═══ -->
+  <section id="panel-telemetrie" class="f1-panel hidden">
+    <div class="f1-controls" style="padding:0 0 1.25rem">
+      <select id="tel-driver-select" class="f1-select"><option value="">Choisir un pilote…</option></select>
+      <select id="tel-lap-select" class="f1-select" disabled><option value="">Charger un pilote d'abord…</option></select>
+      <button class="f1-action-btn primary" id="tel-load-btn" disabled>Charger la télémétrie</button>
+    </div>
+    <div id="telemetry-content"><div class="f1-empty">Sélectionnez un pilote puis un tour pour voir vitesse, accélérateur, frein, rapport et DRS seconde par seconde.</div></div>
+  </section>
+
+  <!-- ═══ PILOTES ═══ -->
+  <section id="panel-pilotes" class="f1-panel hidden">
+    <div id="drivers-content"><div class="f1-skeleton"></div></div>
+  </section>
+
+  <!-- ═══ HISTORIQUE ═══ -->
+  <section id="panel-historique" class="f1-panel hidden">
+    <div class="f1-controls" style="padding:0 0 1.25rem">
+      <select id="hist-driver-select" class="f1-select"><option value="">Choisir un pilote…</option></select>
+      <button class="f1-action-btn" id="hist-load-btn">Comparer les 5 dernières courses</button>
+    </div>
+    <div id="history-content"><div class="f1-empty">Choisissez un pilote pour comparer ses résultats sur les dernières courses de la saison.</div></div>
   </section>
 
   <script>
@@ -193,9 +312,12 @@
     const sessionCard = document.getElementById('session-card');
 
     let currentSessionKey = null;
+    let allRaceSessions = [];
     let driversCache = {};
     let sessionMetaCache = {};
+    let lapsCache = {}; // sessionKey -> driverNumber -> laps[]
     let refreshTimer = null;
+    let activeTab = 'classement';
 
     // OpenF1 caps requests at 30/minute per IP — queue requests one at a time
     // with a gap, and back off (without hammering) on HTTP 429.
@@ -233,27 +355,66 @@
       return '+' + Number(interval).toFixed(3) + 's';
     }
 
+    function fmtLapTime(sec) {
+      if (sec === null || sec === undefined) return '—';
+      const m = Math.floor(sec / 60);
+      const s = (sec - m * 60).toFixed(3).padStart(6, '0');
+      return `${m}:${s}`;
+    }
+
+    // ── TABS ──
+    const tabBtns = document.querySelectorAll('.f1-tab-btn');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeTab = btn.dataset.tab;
+        document.querySelectorAll('.f1-panel').forEach(p => {
+          p.classList.toggle('hidden', p.id !== 'panel-' + activeTab);
+        });
+        onTabShown(activeTab);
+      });
+    });
+
+    function onTabShown(tab) {
+      if (!currentSessionKey) return;
+      if (tab === 'tours') populateDriverSelect(document.getElementById('laps-driver-select'));
+      if (tab === 'telemetrie') populateDriverSelect(document.getElementById('tel-driver-select'));
+      if (tab === 'pilotes') renderDriversTab();
+      if (tab === 'historique') populateDriverSelect(document.getElementById('hist-driver-select'));
+    }
+
+    async function populateDriverSelect(select) {
+      if (select.dataset.filled === currentSessionKey) return;
+      const drivers = await loadDrivers(currentSessionKey);
+      const sorted = Object.values(drivers).sort((a, b) => a.full_name.localeCompare(b.full_name));
+      select.innerHTML = '<option value="">Choisir un pilote…</option>' +
+        sorted.map(d => `<option value="${d.driver_number}">${d.full_name} — ${d.team_name}</option>`).join('');
+      select.dataset.filled = currentSessionKey;
+    }
+
+    // ── SESSIONS ──
     async function loadSessionList() {
       const years = [2026, 2025];
       const results = await Promise.all(
         years.map(y => fetchJSON(`/sessions?session_type=Race&year=${y}`).catch(() => []))
       );
-      const sessions = results.flat()
+      allRaceSessions = results.flat()
         .filter(s => new Date(s.date_end) < new Date())
         .sort((a, b) => new Date(b.date_start) - new Date(a.date_start));
 
       sessionSelect.innerHTML = '';
-      sessions.forEach(s => {
+      allRaceSessions.forEach(s => {
         const opt = document.createElement('option');
         opt.value = s.session_key;
         opt.textContent = `${s.country_name} — ${fmtDate(s.date_start)}`;
         sessionSelect.appendChild(opt);
       });
 
-      if (sessions.length) {
-        currentSessionKey = sessions[0].session_key;
+      if (allRaceSessions.length) {
+        currentSessionKey = String(allRaceSessions[0].session_key);
         sessionSelect.value = currentSessionKey;
-        renderSessionCard(sessions[0]);
+        renderSessionCard(allRaceSessions[0]);
       } else {
         standingsList.innerHTML = '<div class="f1-empty">Aucune session disponible pour le moment.</div>';
       }
@@ -261,10 +422,8 @@
 
     async function renderSessionCard(session) {
       if (!session) {
-        try {
-          const meta = await fetchJSON(`/sessions?session_key=${currentSessionKey}`);
-          session = meta[0];
-        } catch (e) { return; }
+        try { session = await getSessionMeta(currentSessionKey); }
+        catch (e) { return; }
       }
       const meetings = await fetchJSON(`/meetings?meeting_key=${session.meeting_key}`).catch(() => []);
       const meeting = meetings[0];
@@ -308,20 +467,16 @@
       return sessionMetaCache[sessionKey];
     }
 
+    // ── CLASSEMENT ──
     async function loadStandings(sessionKey) {
       const session = await getSessionMeta(sessionKey);
       renderSessionCard(session);
 
-      // Position data for a whole session is small (a few hundred rows) — fetch it
-      // in full rather than guessing a time window, since a race can finish well
-      // before its officially scheduled date_end.
       const [drivers, positions] = await Promise.all([
         loadDrivers(sessionKey),
         fetchJSON(`/position?session_key=${sessionKey}`).catch(() => []),
       ]);
 
-      // Intervals for a whole session can be several MB, so only fetch the tail
-      // end — anchored to the *actual* last position timestamp, not date_end.
       let intervals = [];
       if (positions.length) {
         const lastDataTime = positions.reduce((max, p) => {
@@ -376,19 +531,272 @@
     }
 
     async function refresh() {
-      if (!currentSessionKey) return;
+      if (!currentSessionKey || activeTab !== 'classement') return;
       try {
         await loadStandings(currentSessionKey);
       } catch (e) {
         console.error('F1 Live refresh failed', e);
-        standingsList.innerHTML = `<div class="f1-empty">Impossible de charger les données OpenF1 pour l'instant (${e.message}).<br>Nouvelle tentative automatique dans 15s.</div>`;
+        standingsList.innerHTML = `<div class="f1-empty">Impossible de charger les données OpenF1 pour l'instant (${e.message}).<br>Nouvelle tentative automatique dans 20s.</div>`;
       }
     }
 
+    // ── TOURS & VITESSES ──
+    async function loadLaps(sessionKey, driverNumber) {
+      lapsCache[sessionKey] = lapsCache[sessionKey] || {};
+      if (lapsCache[sessionKey][driverNumber]) return lapsCache[sessionKey][driverNumber];
+      const laps = await fetchJSON(`/laps?session_key=${sessionKey}&driver_number=${driverNumber}`);
+      const cleaned = laps.filter(l => l.lap_duration).sort((a, b) => a.lap_number - b.lap_number);
+      lapsCache[sessionKey][driverNumber] = cleaned;
+      return cleaned;
+    }
+
+    function renderLapsTable(laps, containerId, onPick) {
+      const container = document.getElementById(containerId);
+      if (!laps.length) {
+        container.innerHTML = '<div class="f1-empty">Aucun tour chronométré trouvé pour ce pilote.</div>';
+        return;
+      }
+      const best = Math.min(...laps.map(l => l.lap_duration));
+      container.innerHTML = `
+        <table class="f1-laps-table">
+          <thead><tr>
+            <th>Tour</th><th>Temps</th><th>S1</th><th>S2</th><th>S3</th><th>Vitesse max</th>
+          </tr></thead>
+          <tbody>
+            ${laps.map(l => `
+              <tr class="${l.lap_duration === best ? 'best' : ''} ${onPick ? 'selectable' : ''}" data-lap="${l.lap_number}">
+                <td>${l.lap_number}</td>
+                <td>${fmtLapTime(l.lap_duration)}${l.lap_duration === best ? ' ★' : ''}</td>
+                <td>${l.duration_sector_1 != null ? l.duration_sector_1.toFixed(3) : '—'}</td>
+                <td>${l.duration_sector_2 != null ? l.duration_sector_2.toFixed(3) : '—'}</td>
+                <td>${l.duration_sector_3 != null ? l.duration_sector_3.toFixed(3) : '—'}</td>
+                <td>${l.st_speed != null ? l.st_speed + ' km/h' : '—'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      if (onPick) {
+        container.querySelectorAll('tr.selectable').forEach(tr => {
+          tr.addEventListener('click', () => {
+            container.querySelectorAll('tr').forEach(r => r.classList.remove('picked'));
+            tr.classList.add('picked');
+            onPick(Number(tr.dataset.lap));
+          });
+        });
+      }
+    }
+
+    document.getElementById('laps-load-btn').addEventListener('click', async () => {
+      const driverNumber = document.getElementById('laps-driver-select').value;
+      const content = document.getElementById('laps-content');
+      if (!driverNumber) { content.innerHTML = '<div class="f1-empty">Choisissez d\'abord un pilote.</div>'; return; }
+      content.innerHTML = '<div class="f1-skeleton"></div><div class="f1-skeleton"></div><div class="f1-skeleton"></div>';
+      try {
+        const laps = await loadLaps(currentSessionKey, driverNumber);
+        renderLapsTable(laps, 'laps-content', null);
+      } catch (e) {
+        content.innerHTML = `<div class="f1-empty">Erreur de chargement (${e.message}).</div>`;
+      }
+    });
+
+    // ── TÉLÉMÉTRIE ──
+    const telLapSelect = document.getElementById('tel-lap-select');
+    const telLoadBtn = document.getElementById('tel-load-btn');
+
+    document.getElementById('tel-driver-select').addEventListener('change', async (e) => {
+      const driverNumber = e.target.value;
+      telLapSelect.innerHTML = '<option value="">Chargement des tours…</option>';
+      telLapSelect.disabled = true;
+      telLoadBtn.disabled = true;
+      if (!driverNumber) return;
+      try {
+        const laps = await loadLaps(currentSessionKey, driverNumber);
+        if (!laps.length) {
+          telLapSelect.innerHTML = '<option value="">Aucun tour disponible</option>';
+          return;
+        }
+        telLapSelect.innerHTML = laps.map(l =>
+          `<option value="${l.lap_number}">Tour ${l.lap_number} — ${fmtLapTime(l.lap_duration)}</option>`
+        ).join('');
+        telLapSelect.disabled = false;
+        telLoadBtn.disabled = false;
+      } catch (err) {
+        telLapSelect.innerHTML = '<option value="">Erreur de chargement</option>';
+      }
+    });
+
+    telLapSelect.addEventListener('change', () => {
+      telLoadBtn.disabled = !telLapSelect.value;
+    });
+
+    function buildSparkline(values, width, height, color, fillOpacity) {
+      if (!values.length) return '';
+      const max = Math.max(...values, 1);
+      const min = Math.min(...values, 0);
+      const range = (max - min) || 1;
+      const stepX = width / Math.max(values.length - 1, 1);
+      const points = values.map((v, i) => {
+        const x = (i * stepX).toFixed(1);
+        const y = (height - ((v - min) / range) * height).toFixed(1);
+        return `${x},${y}`;
+      });
+      const linePath = 'M' + points.join(' L');
+      const areaPath = fillOpacity ? `${linePath} L${width},${height} L0,${height} Z` : '';
+      return `
+        <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" preserveAspectRatio="none">
+          ${fillOpacity ? `<path d="${areaPath}" fill="${color}" opacity="${fillOpacity}" stroke="none"/>` : ''}
+          <path d="${linePath}" fill="none" stroke="${color}" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+        </svg>
+      `;
+    }
+
+    function renderTelemetry(carData) {
+      const content = document.getElementById('telemetry-content');
+      if (!carData.length) {
+        content.innerHTML = '<div class="f1-empty">Pas de données de télémétrie pour ce tour.</div>';
+        return;
+      }
+      const speeds = carData.map(d => d.speed || 0);
+      const throttles = carData.map(d => d.throttle || 0);
+      const brakes = carData.map(d => d.brake || 0);
+      const gears = carData.map(d => d.n_gear || 0);
+      const drsOn = carData.map(d => d.drs >= 10);
+
+      const maxSpeed = Math.max(...speeds);
+      const maxGear = Math.max(...gears, 1);
+
+      content.innerHTML = `
+        <div class="f1-telemetry-charts">
+          <div class="f1-chart-card">
+            <div class="f1-chart-label"><span>Vitesse</span><span class="f1-chart-val">${maxSpeed} km/h max</span></div>
+            ${buildSparkline(speeds, 600, 70, '#D4AF37', 0.12)}
+          </div>
+          <div class="f1-chart-card">
+            <div class="f1-chart-label"><span>Accélérateur</span><span class="f1-chart-val">%</span></div>
+            ${buildSparkline(throttles, 600, 50, '#39d353', 0.15)}
+          </div>
+          <div class="f1-chart-card">
+            <div class="f1-chart-label"><span>Frein</span><span class="f1-chart-val">%</span></div>
+            ${buildSparkline(brakes, 600, 50, '#f54242', 0.15)}
+          </div>
+          <div class="f1-chart-card">
+            <div class="f1-chart-label"><span>Rapport engagé</span><span class="f1-chart-val">1–${maxGear}</span></div>
+            ${buildSparkline(gears, 600, 40, '#42a0f5', 0)}
+          </div>
+          <div class="f1-chart-card">
+            <div class="f1-chart-label"><span>DRS</span><span class="f1-chart-val">${drsOn.filter(Boolean).length} / ${drsOn.length} points actifs</span></div>
+            <div class="f1-drs-strip">
+              ${drsOn.map(on => `<div class="f1-drs-seg" style="background:${on ? '#39d353' : 'rgba(255,255,255,.08)'}"></div>`).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    telLoadBtn.addEventListener('click', async () => {
+      const driverNumber = document.getElementById('tel-driver-select').value;
+      const lapNumber = Number(telLapSelect.value);
+      const content = document.getElementById('telemetry-content');
+      if (!driverNumber || !lapNumber) return;
+      content.innerHTML = '<div class="f1-skeleton" style="height:200px"></div>';
+      try {
+        const laps = await loadLaps(currentSessionKey, driverNumber);
+        const lap = laps.find(l => l.lap_number === lapNumber);
+        if (!lap) throw new Error('Tour introuvable');
+        const start = new Date(lap.date_start);
+        const end = new Date(start.getTime() + (lap.lap_duration + 1) * 1000);
+        const carData = await fetchJSON(
+          `/car_data?session_key=${currentSessionKey}&driver_number=${driverNumber}&date>=${start.toISOString()}&date<=${end.toISOString()}`
+        );
+        renderTelemetry(carData);
+      } catch (e) {
+        content.innerHTML = `<div class="f1-empty">Erreur de chargement (${e.message}).</div>`;
+      }
+    });
+
+    // ── PILOTES ──
+    async function renderDriversTab() {
+      const content = document.getElementById('drivers-content');
+      content.innerHTML = '<div class="f1-skeleton"></div>';
+      try {
+        const drivers = await loadDrivers(currentSessionKey);
+        const sorted = Object.values(drivers).sort((a, b) => (a.team_name || '').localeCompare(b.team_name || ''));
+        content.innerHTML = `
+          <div class="f1-driver-grid">
+            ${sorted.map(d => `
+              <div class="f1-driver-card" style="--team-color:${d.team_colour ? '#' + d.team_colour : '#888'}">
+                <img src="${d.headshot_url || ''}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+                <div>
+                  <div class="f1-driver-name">${d.full_name}</div>
+                  <div class="f1-driver-team">${d.team_name || '—'}</div>
+                  <div class="num">#${d.driver_number} · ${d.country_code || '—'}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } catch (e) {
+        content.innerHTML = `<div class="f1-empty">Erreur de chargement (${e.message}).</div>`;
+      }
+    }
+
+    // ── HISTORIQUE ──
+    document.getElementById('hist-load-btn').addEventListener('click', async () => {
+      const driverNumber = document.getElementById('hist-driver-select').value;
+      const content = document.getElementById('history-content');
+      if (!driverNumber) { content.innerHTML = '<div class="f1-empty">Choisissez d\'abord un pilote.</div>'; return; }
+
+      const recent = allRaceSessions.slice(0, 5);
+      content.innerHTML = '<div class="f1-skeleton"></div><div class="f1-skeleton"></div><div class="f1-skeleton"></div>';
+
+      try {
+        const results = [];
+        for (const s of recent) {
+          const positions = await fetchJSON(`/position?session_key=${s.session_key}&driver_number=${driverNumber}`).catch(() => []);
+          const drivers = await loadDrivers(s.session_key).catch(() => ({}));
+          const last = positions.length ? positions[positions.length - 1] : null;
+          results.push({
+            session: s,
+            position: last ? last.position : null,
+            team: drivers[driverNumber] ? drivers[driverNumber].team_name : '—',
+          });
+        }
+        if (!results.length) {
+          content.innerHTML = '<div class="f1-empty">Pas de données historiques disponibles.</div>';
+          return;
+        }
+        content.innerHTML = `
+          <table class="f1-history-table">
+            <thead><tr><th>Course</th><th>Écurie</th><th>Position finale</th></tr></thead>
+            <tbody>
+              ${results.map(r => `
+                <tr>
+                  <td>${r.session.country_name} — ${fmtDate(r.session.date_start)}</td>
+                  <td>${r.team}</td>
+                  <td class="f1-history-pos" style="color:${r.position === 1 ? '#f5c842' : r.position && r.position <= 3 ? '#d9d9e3' : 'var(--text-primary)'}">${r.position != null ? r.position : '—'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } catch (e) {
+        content.innerHTML = `<div class="f1-empty">Erreur de chargement (${e.message}).</div>`;
+      }
+    });
+
+    // ── SESSION CHANGE ──
     sessionSelect.addEventListener('change', () => {
       currentSessionKey = sessionSelect.value;
       standingsList.innerHTML = '<div class="f1-skeleton"></div><div class="f1-skeleton"></div><div class="f1-skeleton"></div>';
+      document.getElementById('laps-driver-select').dataset.filled = '';
+      document.getElementById('tel-driver-select').dataset.filled = '';
+      document.getElementById('hist-driver-select').dataset.filled = '';
+      document.getElementById('laps-content').innerHTML = '<div class="f1-empty">Choisissez un pilote pour afficher ses temps au tour, secteurs et vitesses de pointe.</div>';
+      document.getElementById('telemetry-content').innerHTML = '<div class="f1-empty">Sélectionnez un pilote puis un tour pour voir vitesse, accélérateur, frein, rapport et DRS seconde par seconde.</div>';
+      document.getElementById('history-content').innerHTML = '<div class="f1-empty">Choisissez un pilote pour comparer ses résultats sur les dernières courses de la saison.</div>';
       refresh();
+      if (activeTab !== 'classement') onTabShown(activeTab);
     });
 
     refreshBtn.addEventListener('click', refresh);
