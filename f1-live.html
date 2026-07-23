@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F1 Live — OpenF1 Data</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+
+  <style>
+    :root {
+      --f1-green: #39d353;
+      --f1-yellow: #f5c842;
+      --f1-red: #f54242;
+      --mono: 'JetBrains Mono', 'Courier New', monospace;
+    }
+    body { background: #08080f; }
+
+    .f1-hero {
+      padding: calc(var(--nav-h) + 2.5rem) var(--section-pad-x) 1.5rem;
+      display: flex; flex-direction: column; gap: .75rem;
+    }
+    .f1-eyebrow {
+      font-size: .6875rem; font-weight: 700; letter-spacing: .2em;
+      text-transform: uppercase; color: rgba(255,255,255,.35);
+    }
+    .f1-title {
+      font-size: clamp(2rem, 5vw, 3.25rem); font-weight: 900;
+      letter-spacing: -.04em; line-height: .95;
+      background: linear-gradient(150deg, #fff 0%, rgba(212,175,55,.75) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .f1-subtitle { font-size: .875rem; color: rgba(255,255,255,.45); }
+    .f1-credit { font-size: .75rem; color: rgba(255,255,255,.3); }
+    .f1-credit a { color: #D4AF37; text-decoration: none; }
+    .f1-credit a:hover { text-decoration: underline; }
+
+    /* ── CONTROLS ── */
+    .f1-controls {
+      display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+      padding: 0 var(--section-pad-x) 1.5rem;
+    }
+    .f1-select {
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
+      color: var(--text-primary); font-family: var(--font-sans); font-size: .8125rem;
+      font-weight: 600; padding: .55rem 1rem; border-radius: 10px; cursor: pointer;
+      min-width: 260px; max-width: 100%;
+    }
+    .f1-select:focus { outline: 1px solid #D4AF37; }
+    .f1-live-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: rgba(249,59,59,.12); border: 1px solid rgba(249,59,59,.35);
+      border-radius: 8px; padding: .4rem .9rem;
+      font-size: .6875rem; font-weight: 800; letter-spacing: .12em;
+      text-transform: uppercase; color: #f93b3b;
+    }
+    .f1-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #f93b3b; animation: f1blink 1.2s ease-in-out infinite; }
+    @keyframes f1blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+    .f1-updated { font-size: .6875rem; color: rgba(255,255,255,.3); font-family: var(--mono); }
+    .f1-refresh-btn {
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.6); padding: .5rem .9rem; border-radius: 10px;
+      font-size: .75rem; font-weight: 600; cursor: pointer; transition: background .2s;
+    }
+    .f1-refresh-btn:hover { background: rgba(255,255,255,.1); color: var(--text-primary); }
+
+    /* ── SESSION CARD ── */
+    .f1-session-card {
+      margin: 0 var(--section-pad-x) 2rem;
+      background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+    }
+    .f1-sc-flag { width: 32px; height: auto; border-radius: 3px; flex-shrink: 0; }
+    .f1-sc-name { font-size: 1.0625rem; font-weight: 800; color: var(--text-primary); }
+    .f1-sc-meta { font-size: .75rem; color: rgba(255,255,255,.4); margin-top: .15rem; }
+    .f1-sc-stat { margin-left: auto; text-align: right; }
+    .f1-sc-stat-label { font-size: .5625rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.3); display: block; }
+    .f1-sc-stat-val { font-family: var(--mono); font-size: .875rem; font-weight: 700; color: var(--text-primary); }
+
+    /* ── STANDINGS LIST ── */
+    .f1-standings { padding: 0 var(--section-pad-x) 4rem; }
+    .f1-row {
+      display: grid;
+      grid-template-columns: 44px 40px 1fr auto auto;
+      align-items: center; gap: 1rem;
+      padding: .7rem 1.1rem;
+      background: rgba(255,255,255,.02);
+      border: 1px solid rgba(255,255,255,.06);
+      border-left: 3px solid var(--team-color, #888);
+      border-radius: 10px; margin-bottom: .5rem;
+      transition: background .2s;
+    }
+    .f1-row:hover { background: rgba(255,255,255,.045); }
+    .f1-pos { font-family: var(--mono); font-size: 1.125rem; font-weight: 800; color: var(--text-primary); text-align: center; }
+    .f1-pos.p1 { color: #f5c842; }
+    .f1-pos.p2 { color: #d9d9e3; }
+    .f1-pos.p3 { color: #cd8a4a; }
+    .f1-headshot {
+      width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.1);
+    }
+    .f1-driver-name { font-size: .875rem; font-weight: 700; color: var(--text-primary); }
+    .f1-driver-team { font-size: .6875rem; color: rgba(255,255,255,.4); margin-top: .1rem; }
+    .f1-gap { font-family: var(--mono); font-size: .8125rem; font-weight: 700; color: rgba(255,255,255,.75); text-align: right; min-width: 72px; }
+    .f1-num { font-family: var(--mono); font-size: .75rem; color: rgba(255,255,255,.35); text-align: right; min-width: 34px; }
+
+    .f1-empty {
+      text-align: center; padding: 3rem 1rem; color: rgba(255,255,255,.35);
+      font-size: .875rem;
+    }
+    .f1-skeleton {
+      height: 58px; border-radius: 10px; margin-bottom: .5rem;
+      background: linear-gradient(90deg, rgba(255,255,255,.03) 25%, rgba(255,255,255,.06) 50%, rgba(255,255,255,.03) 75%);
+      background-size: 200% 100%; animation: f1shimmer 1.4s ease-in-out infinite;
+    }
+    @keyframes f1shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    @media (max-width: 640px) {
+      .f1-row { grid-template-columns: 32px 34px 1fr auto; }
+      .f1-num { display: none; }
+      .f1-sc-stat { margin-left: 0; text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ NAV ═══ -->
+  <nav class="nav-glass" id="nav">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-dot"></span>
+      Collection
+    </a>
+    <ul class="nav-links">
+      <li><a href="./index.html" class="nav-catalogue-link">Garage</a></li>
+      <li><a href="catalogue.html" class="nav-catalogue-link">Catalogue</a></li>
+      <li><a href="lemans-classique.html" class="nav-catalogue-link">Le Mans</a></li>
+      <li><a href="live-timing.html" class="nav-catalogue-link">Live Timing</a></li>
+      <li><a href="f1-live.html" class="nav-catalogue-link" style="color:var(--text-primary)">F1 Live</a></li>
+    </ul>
+  </nav>
+
+  <!-- ═══ HERO ═══ -->
+  <header class="f1-hero">
+    <p class="f1-eyebrow">Données temps réel · Formula 1</p>
+    <h1 class="f1-title">F1 Live</h1>
+    <p class="f1-subtitle">Classement, écarts et informations de course en direct.</p>
+    <p class="f1-credit">Données fournies par <a href="https://api.openf1.org" target="_blank" rel="noopener">OpenF1</a> — API open-source : <a href="https://github.com/br-g/openf1" target="_blank" rel="noopener">github.com/br-g/openf1</a></p>
+  </header>
+
+  <!-- ═══ CONTROLS ═══ -->
+  <div class="f1-controls">
+    <select id="session-select" class="f1-select">
+      <option value="">Chargement des sessions…</option>
+    </select>
+    <div class="f1-live-badge"><span class="f1-live-dot"></span>Auto-refresh</div>
+    <span class="f1-updated" id="last-updated">—</span>
+    <button class="f1-refresh-btn" id="refresh-btn">↻ Rafraîchir</button>
+  </div>
+
+  <!-- ═══ SESSION INFO ═══ -->
+  <div class="f1-session-card" id="session-card" style="display:none">
+    <img id="sc-flag" class="f1-sc-flag" src="" alt="">
+    <div>
+      <div class="f1-sc-name" id="sc-name">—</div>
+      <div class="f1-sc-meta" id="sc-meta">—</div>
+    </div>
+    <div class="f1-sc-stat">
+      <span class="f1-sc-stat-label">Circuit</span>
+      <span class="f1-sc-stat-val" id="sc-circuit">—</span>
+    </div>
+  </div>
+
+  <!-- ═══ STANDINGS ═══ -->
+  <section class="f1-standings">
+    <div id="standings-list">
+      <div class="f1-skeleton"></div>
+      <div class="f1-skeleton"></div>
+      <div class="f1-skeleton"></div>
+      <div class="f1-skeleton"></div>
+      <div class="f1-skeleton"></div>
+    </div>
+  </section>
+
+  <script>
+    const API = 'https://api.openf1.org/v1';
+    const sessionSelect = document.getElementById('session-select');
+    const standingsList = document.getElementById('standings-list');
+    const lastUpdated = document.getElementById('last-updated');
+    const refreshBtn = document.getElementById('refresh-btn');
+    const sessionCard = document.getElementById('session-card');
+
+    let currentSessionKey = null;
+    let driversCache = {};
+    let sessionMetaCache = {};
+    let refreshTimer = null;
+
+    // OpenF1 caps requests at 30/minute per IP — queue requests one at a time
+    // with a gap, and back off (without hammering) on HTTP 429.
+    let requestQueue = Promise.resolve();
+    function fetchJSON(path, retries = 2) {
+      const run = () => new Promise((resolve, reject) => {
+        setTimeout(async () => {
+          try {
+            const res = await fetch(API + path);
+            if (res.status === 429 && retries > 0) {
+              await new Promise(r => setTimeout(r, 4000));
+              return resolve(fetchJSON(path, retries - 1));
+            }
+            if (!res.ok) throw new Error('OpenF1 API error: ' + res.status);
+            resolve(await res.json());
+          } catch (e) { reject(e); }
+        }, 250);
+      });
+      const result = requestQueue.then(run, run);
+      requestQueue = result.catch(() => {});
+      return result;
+    }
+
+    function fmtDate(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function fmtGap(interval, gapToLeader, position) {
+      if (position === 1) return 'Leader';
+      if (interval === null || interval === undefined) {
+        if (gapToLeader === null || gapToLeader === undefined) return '—';
+        return '+' + Number(gapToLeader).toFixed(3) + 's';
+      }
+      return '+' + Number(interval).toFixed(3) + 's';
+    }
+
+    async function loadSessionList() {
+      const years = [2026, 2025];
+      const results = await Promise.all(
+        years.map(y => fetchJSON(`/sessions?session_type=Race&year=${y}`).catch(() => []))
+      );
+      const sessions = results.flat()
+        .filter(s => new Date(s.date_end) < new Date())
+        .sort((a, b) => new Date(b.date_start) - new Date(a.date_start));
+
+      sessionSelect.innerHTML = '';
+      sessions.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.session_key;
+        opt.textContent = `${s.country_name} — ${fmtDate(s.date_start)}`;
+        sessionSelect.appendChild(opt);
+      });
+
+      if (sessions.length) {
+        currentSessionKey = sessions[0].session_key;
+        sessionSelect.value = currentSessionKey;
+        renderSessionCard(sessions[0]);
+      } else {
+        standingsList.innerHTML = '<div class="f1-empty">Aucune session disponible pour le moment.</div>';
+      }
+    }
+
+    async function renderSessionCard(session) {
+      if (!session) {
+        try {
+          const meta = await fetchJSON(`/sessions?session_key=${currentSessionKey}`);
+          session = meta[0];
+        } catch (e) { return; }
+      }
+      const meetings = await fetchJSON(`/meetings?meeting_key=${session.meeting_key}`).catch(() => []);
+      const meeting = meetings[0];
+      document.getElementById('sc-name').textContent = meeting ? meeting.meeting_name : session.location;
+      document.getElementById('sc-meta').textContent = `${session.session_name} · ${fmtDate(session.date_start)}`;
+      document.getElementById('sc-circuit').textContent = session.circuit_short_name || session.location;
+      const flag = document.getElementById('sc-flag');
+      if (meeting && meeting.country_flag) {
+        flag.src = meeting.country_flag;
+        flag.style.display = '';
+      } else {
+        flag.style.display = 'none';
+      }
+      sessionCard.style.display = '';
+    }
+
+    async function loadDrivers(sessionKey) {
+      if (driversCache[sessionKey]) return driversCache[sessionKey];
+      const drivers = await fetchJSON(`/drivers?session_key=${sessionKey}`);
+      const map = {};
+      drivers.forEach(d => { map[d.driver_number] = d; });
+      driversCache[sessionKey] = map;
+      return map;
+    }
+
+    function latestByDriver(rows) {
+      const map = {};
+      rows.forEach(r => {
+        const existing = map[r.driver_number];
+        if (!existing || new Date(r.date) > new Date(existing.date)) {
+          map[r.driver_number] = r;
+        }
+      });
+      return map;
+    }
+
+    async function getSessionMeta(sessionKey) {
+      if (!sessionMetaCache[sessionKey]) {
+        sessionMetaCache[sessionKey] = (await fetchJSON(`/sessions?session_key=${sessionKey}`))[0];
+      }
+      return sessionMetaCache[sessionKey];
+    }
+
+    async function loadStandings(sessionKey) {
+      const session = await getSessionMeta(sessionKey);
+      renderSessionCard(session);
+
+      // Position data for a whole session is small (a few hundred rows) — fetch it
+      // in full rather than guessing a time window, since a race can finish well
+      // before its officially scheduled date_end.
+      const [drivers, positions] = await Promise.all([
+        loadDrivers(sessionKey),
+        fetchJSON(`/position?session_key=${sessionKey}`).catch(() => []),
+      ]);
+
+      // Intervals for a whole session can be several MB, so only fetch the tail
+      // end — anchored to the *actual* last position timestamp, not date_end.
+      let intervals = [];
+      if (positions.length) {
+        const lastDataTime = positions.reduce((max, p) => {
+          const t = new Date(p.date).getTime();
+          return t > max ? t : max;
+        }, 0);
+        const windowStart = new Date(lastDataTime - 3 * 60 * 1000).toISOString();
+        intervals = await fetchJSON(`/intervals?session_key=${sessionKey}&date>=${windowStart}`).catch(() => []);
+      }
+
+      const posMap = latestByDriver(positions);
+      const intMap = latestByDriver(intervals);
+
+      const rows = Object.values(posMap)
+        .map(p => {
+          const driver = drivers[p.driver_number] || {};
+          const interval = intMap[p.driver_number];
+          return {
+            position: p.position,
+            driverNumber: p.driver_number,
+            name: driver.full_name || driver.broadcast_name || `#${p.driver_number}`,
+            team: driver.team_name || '—',
+            teamColor: driver.team_colour ? '#' + driver.team_colour : '#888',
+            headshot: driver.headshot_url || '',
+            interval: interval ? interval.interval : null,
+            gapToLeader: interval ? interval.gap_to_leader : null,
+          };
+        })
+        .sort((a, b) => a.position - b.position);
+
+      renderStandings(rows);
+      lastUpdated.textContent = 'Mis à jour ' + new Date().toLocaleTimeString('fr-FR');
+    }
+
+    function renderStandings(rows) {
+      if (!rows.length) {
+        standingsList.innerHTML = '<div class="f1-empty">Pas de données de classement pour cette session.</div>';
+        return;
+      }
+      standingsList.innerHTML = rows.map(r => `
+        <div class="f1-row" style="--team-color:${r.teamColor}">
+          <div class="f1-pos ${r.position === 1 ? 'p1' : r.position === 2 ? 'p2' : r.position === 3 ? 'p3' : ''}">${r.position}</div>
+          ${r.headshot ? `<img class="f1-headshot" src="${r.headshot}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : '<div class="f1-headshot"></div>'}
+          <div>
+            <div class="f1-driver-name">${r.name}</div>
+            <div class="f1-driver-team">${r.team}</div>
+          </div>
+          <div class="f1-num">#${r.driverNumber}</div>
+          <div class="f1-gap">${fmtGap(r.interval, r.gapToLeader, r.position)}</div>
+        </div>
+      `).join('');
+    }
+
+    async function refresh() {
+      if (!currentSessionKey) return;
+      try {
+        await loadStandings(currentSessionKey);
+      } catch (e) {
+        console.error('F1 Live refresh failed', e);
+        standingsList.innerHTML = `<div class="f1-empty">Impossible de charger les données OpenF1 pour l'instant (${e.message}).<br>Nouvelle tentative automatique dans 15s.</div>`;
+      }
+    }
+
+    sessionSelect.addEventListener('change', () => {
+      currentSessionKey = sessionSelect.value;
+      standingsList.innerHTML = '<div class="f1-skeleton"></div><div class="f1-skeleton"></div><div class="f1-skeleton"></div>';
+      refresh();
+    });
+
+    refreshBtn.addEventListener('click', refresh);
+
+    (async function init() {
+      await loadSessionList();
+      if (currentSessionKey) await refresh();
+      refreshTimer = setInterval(refresh, 20000);
+    })();
+  </script>
+
+</body>
+</html>
