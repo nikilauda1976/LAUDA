@@ -330,141 +330,116 @@
 
       <!-- SVG Circuit -->
       <div class="circuit-svg-wrap">
-        <svg viewBox="0 0 560 450" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Tracé du Circuit de la Sarthe">
+        <svg viewBox="0 0 960 520" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Tracé du Circuit de la Sarthe">
 
           <!--
-            Circuit de la Sarthe — tracé fidèle, sens horaire
-            Orientation : pit straight à GAUCHE (vertical), Mulsanne à DROITE (vertical)
-            Top : liaison est-ouest via Dunlop → Esses → Tertre Rouge
-            Bottom : Indianapolis → Arnage → Porsche Curves → Chicanes Ford
+            Circuit de la Sarthe — tracé fidèle à la carte officielle (21 virages), sens horaire
+            Orientation : pointe Mulsanne (virage 9) en HAUT-DROITE, start/finish en BAS-CENTRE
+            Gauche (montée) : virages 1→6 — Dunlop → Esses de la Forêt → Tertre Rouge
+            Haut (ligne droite) : 6→7→8→9 — Ligne des Hunaudières
+            Droite (descente) : 9→10→11→12 — Mulsanne Corner
+            Bas : 13→17 — Indianapolis → Arnage → Porsche Curves
+            Retour stands : 18→21 — Chicanes Ford
           -->
-          <defs>
-            <!--
-              Tracé point par point (sens horaire depuis Start/Finish) :
-              1. Ligne droite des stands (gauche, monte vers le nord)
-              2. Dunlop (virage droit haut-gauche)
-              3. Top : esses + forêt + Maison Blanche → Tertre Rouge (haut-droit)
-              4. Hunaudières / Mulsanne (descend à droite) + 2 chicanes
-              5. Mulsanne Corner (bas-droit, virage gauche)
-              6. Indianapolis S-bend
-              7. Arnage (épingle droite)
-              8. Courbes Porsche (retour bas-gauche)
-              9. Chicanes Ford (2 chicanes avant les stands)
-            -->
-            <path id="lm-circuit" d="
-              M 86,378
-              L 80,118
-              C 80,100 92,84 114,76
-              C 142,66 190,57 248,53
-              C 302,49 360,51 412,57
-              C 444,61 466,77 474,110
-              L 474,188
-              L 459,203
-              L 474,214
-              L 474,292
-              L 459,307
-              L 474,318
-              C 474,350 468,370 448,382
-              C 428,394 400,400 368,400
-              C 345,400 325,408 308,415
-              C 290,423 271,425 255,416
-              C 237,407 220,402 204,406
-              C 187,410 171,418 156,420
-              C 140,421 125,414 115,408
-              L 105,415
-              L 95,408
-              L 87,400
-              L 86,390
-              L 86,378
-            "/>
-          </defs>
+          <!-- Glow (référence #lm-circuit défini plus bas, valide même avant sa déclaration dans le DOM) -->
+          <use href="#lm-circuit" stroke="rgba(255,107,53,0.06)" stroke-width="30" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+          <use href="#lm-circuit" stroke="rgba(255,107,53,0.03)" stroke-width="46" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
 
-          <!-- Glow -->
-          <use href="#lm-circuit" stroke="rgba(255,107,53,0.06)" stroke-width="26" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
-          <use href="#lm-circuit" stroke="rgba(255,107,53,0.03)" stroke-width="40" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+          <!-- Hunaudières / Mulsanne : orange (virages 6 → 12) — statique -->
+          <path d="M 400,190 L 676,66 L 905,63 C 915,70 912,84 902,96 L 802,330 L 778,345 L 790,378"
+                stroke="rgba(232,98,42,0.5)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 
-          <!-- Mulsanne / Hunaudières : orange -->
-          <path d="M 474,110 L 474,188 L 459,203 L 474,214 L 474,292 L 459,307 L 474,318 C 474,350 468,370 448,382"
-                stroke="rgba(232,98,42,0.5)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <!-- Chicanes Ford — jaune (virages 18-21, retour vers les stands) — statique -->
+          <path d="M 366,456 L 350,462 L 320,448 L 330,463" stroke="rgba(255,210,70,0.75)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 
-          <!-- Tracé principal blanc -->
-          <use href="#lm-circuit" stroke="rgba(255,255,255,0.75)" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+          <!-- Porsche Curves — S rapide, orange (virages 15-16-17) — statique -->
+          <path d="M 599,460 L 543,440 L 508,440 C 492,444 476,447 463,449" stroke="rgba(232,98,42,0.55)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 
-          <!-- Chicanes Mulsanne — jaune -->
-          <path d="M 474,188 L 459,203 L 474,214" stroke="rgba(255,210,70,0.9)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <path d="M 474,292 L 459,307 L 474,318" stroke="rgba(255,210,70,0.9)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <!-- Tracé principal blanc — path RÉEL (pas un <use>) pour pouvoir se dessiner à la vitesse exacte de la voiture -->
+          <path id="lm-circuit" stroke="rgba(255,255,255,0.75)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="none" d="
+              M 300,464
+              L 208,464
+              C 200,458 198,448 206,436
+              L 178,441
+              C 158,428 128,392 118,377
+              C 104,357 92,330 92,308
+              C 92,292 100,280 116,268
+              C 180,232 300,205 400,190
+              L 676,66
+              L 905,63
+              C 915,70 912,84 902,96
+              L 802,330
+              L 778,345
+              L 790,378
+              C 782,398 758,412 720,420
+              L 686,431
+              C 655,443 622,452 599,460
+              L 543,440
+              L 508,440
+              C 492,444 476,447 463,449
+              L 366,456
+              L 350,462
+              L 320,448
+              L 330,463
+              C 320,466 310,466 300,464
+          "/>
 
-          <!-- Chicanes Ford — jaune -->
-          <path d="M 115,408 L 105,415 L 95,408 L 87,400" stroke="rgba(255,210,70,0.75)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-
-          <!-- ═══ START / FINISH ═══ -->
-          <line x1="76" y1="368" x2="96" y2="368" stroke="#E8622A" stroke-width="3"/>
-          <rect x="79" y="363" width="5" height="4" fill="#E8622A" opacity=".8" rx="1"/>
-          <rect x="84" y="363" width="5" height="4" fill="rgba(255,255,255,.45)" rx="1"/>
-          <rect x="79" y="367" width="5" height="4" fill="rgba(255,255,255,.45)" rx="1"/>
-          <rect x="84" y="367" width="5" height="4" fill="#E8622A" opacity=".8" rx="1"/>
+          <!-- ═══ START / FINISH (pit straight horizontale) ═══ -->
+          <line x1="300" y1="454" x2="300" y2="474" stroke="#E8622A" stroke-width="3"/>
+          <rect x="295" y="454" width="5" height="4" fill="#E8622A" opacity=".8" rx="1"/>
+          <rect x="300" y="454" width="5" height="4" fill="rgba(255,255,255,.45)" rx="1"/>
+          <rect x="295" y="458" width="5" height="4" fill="rgba(255,255,255,.45)" rx="1"/>
+          <rect x="300" y="458" width="5" height="4" fill="#E8622A" opacity=".8" rx="1"/>
 
           <!-- ═══ ÉTIQUETTE HUNAUDIÈRES ═══ -->
-          <line x1="494" y1="115" x2="494" y2="378" stroke="rgba(232,98,42,.32)" stroke-width="1.2" stroke-dasharray="3,5"/>
-          <text x="498" y="248" fill="rgba(232,98,42,.52)" font-size="7.5" font-family="Inter,sans-serif" font-weight="700" letter-spacing="1.3" writing-mode="vertical-rl" text-anchor="middle">HUNAUDIÈRES</text>
+          <text x="650" y="105" fill="rgba(232,98,42,.55)" font-size="10" font-family="Inter,sans-serif" font-weight="700" letter-spacing="1.8" text-anchor="middle">LIGNE DROITE DES HUNAUDIÈRES</text>
 
-          <!-- ═══ LABELS CORNERS ═══ -->
+          <!-- ═══ LABELS CORNERS (numérotation officielle 1-21) ═══ -->
 
           <!-- Start/Finish -->
-          <circle cx="86" cy="378" r="5.5" fill="#E8622A"/>
-          <text x="99" y="382" fill="rgba(255,255,255,.7)" font-size="7.5" font-family="Inter,sans-serif" font-weight="600">START / FINISH</text>
+          <circle cx="300" cy="464" r="6" fill="#E8622A"/>
+          <text x="300" y="490" fill="rgba(255,255,255,.7)" font-size="10" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">START / FINISH</text>
 
-          <!-- Dunlop (haut-gauche) -->
-          <circle cx="80" cy="118" r="4" fill="rgba(255,255,255,.55)"/>
-          <text x="92" y="122" fill="rgba(255,255,255,.45)" font-size="7" font-family="Inter,sans-serif" font-weight="600">DUNLOP</text>
+          <!-- Dunlop (virages 1-3, sortie des stands) -->
+          <circle cx="206" cy="436" r="4.5" fill="rgba(255,255,255,.55)"/>
+          <text x="212" y="420" fill="rgba(255,255,255,.45)" font-size="9.5" font-family="Inter,sans-serif" font-weight="600">DUNLOP</text>
 
-          <!-- Esses Forêt (top milieu) -->
-          <circle cx="248" cy="53" r="3.5" fill="rgba(255,255,255,.4)"/>
-          <text x="230" y="44" fill="rgba(255,255,255,.38)" font-size="6.5" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">ESSES FORÊT</text>
+          <!-- Esses de la Forêt (virages 4-5-6, montée gauche) -->
+          <circle cx="92" cy="308" r="4.5" fill="rgba(255,255,255,.4)"/>
+          <text x="60" y="308" fill="rgba(255,255,255,.38)" font-size="9" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle" transform="rotate(-90 60 308)">ESSES DE LA FORÊT</text>
 
-          <!-- Tertre Rouge (haut-droit) -->
-          <circle cx="412" cy="57" r="4" fill="rgba(255,255,255,.55)"/>
-          <text x="390" y="48" fill="rgba(255,255,255,.45)" font-size="7" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">TERTRE ROUGE</text>
+          <!-- Tertre Rouge (virage 6-7, début ligne droite) -->
+          <circle cx="180" cy="230" r="4.5" fill="rgba(255,255,255,.55)"/>
+          <text x="195" y="215" fill="rgba(255,255,255,.45)" font-size="9.5" font-family="Inter,sans-serif" font-weight="600">TERTRE ROUGE</text>
 
-          <!-- Chicane 1 Mulsanne -->
-          <circle cx="459" cy="203" r="3.5" fill="rgba(255,210,70,.85)"/>
-          <text x="466" y="207" fill="rgba(255,210,70,.7)" font-size="6.5" font-family="Inter,sans-serif" font-weight="700">CHICANE 1</text>
+          <!-- Mulsanne Corner (virages 10-12) -->
+          <circle cx="790" cy="378" r="4.5" fill="rgba(255,255,255,.55)"/>
+          <text x="808" y="396" fill="rgba(255,255,255,.42)" font-size="9.5" font-family="Inter,sans-serif" font-weight="600">MULSANNE CORNER</text>
 
-          <!-- Chicane 2 Mulsanne -->
-          <circle cx="459" cy="307" r="3.5" fill="rgba(255,210,70,.85)"/>
-          <text x="466" y="311" fill="rgba(255,210,70,.7)" font-size="6.5" font-family="Inter,sans-serif" font-weight="700">CHICANE 2</text>
+          <!-- Indianapolis (virage 13) -->
+          <circle cx="686" cy="431" r="4.5" fill="rgba(255,255,255,.55)"/>
+          <text x="700" y="448" fill="rgba(255,255,255,.42)" font-size="9.5" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">INDIANAPOLIS</text>
 
-          <!-- Mulsanne Corner -->
-          <circle cx="448" cy="382" r="4" fill="rgba(255,255,255,.55)"/>
-          <text x="408" y="398" fill="rgba(255,255,255,.42)" font-size="7" font-family="Inter,sans-serif" font-weight="600">MULSANNE CORNER</text>
+          <!-- Arnage (virage 14) -->
+          <circle cx="599" cy="460" r="4.5" fill="rgba(255,255,255,.55)"/>
+          <text x="599" y="480" fill="rgba(255,255,255,.42)" font-size="9.5" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">ARNAGE</text>
 
-          <!-- Indianapolis -->
-          <circle cx="368" cy="400" r="4" fill="rgba(255,255,255,.55)"/>
-          <text x="345" y="413" fill="rgba(255,255,255,.42)" font-size="7" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">INDIANAPOLIS</text>
+          <!-- Porsche Curves (virages 15-17) -->
+          <circle cx="508" cy="440" r="4.5" fill="#E8622A" opacity=".85"/>
+          <text x="500" y="424" fill="rgba(232,98,42,.8)" font-size="9.5" font-family="Inter,sans-serif" font-weight="700" text-anchor="middle">PORSCHE CURVES</text>
 
-          <!-- Arnage -->
-          <circle cx="255" cy="416" r="4" fill="rgba(255,255,255,.55)"/>
-          <text x="255" y="434" fill="rgba(255,255,255,.42)" font-size="7" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">ARNAGE</text>
+          <!-- Chicanes Ford (virages 18-21) -->
+          <circle cx="345" cy="456" r="4" fill="rgba(255,210,70,.75)"/>
+          <text x="345" y="490" fill="rgba(255,210,70,.6)" font-size="9" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">CHICANES FORD</text>
 
-          <!-- Porsche Curves -->
-          <circle cx="156" cy="420" r="4" fill="#E8622A" opacity=".85"/>
-          <text x="156" y="437" fill="rgba(232,98,42,.8)" font-size="7" font-family="Inter,sans-serif" font-weight="700" text-anchor="middle">PORSCHE CURVES</text>
-
-          <!-- Chicanes Ford -->
-          <circle cx="105" cy="415" r="3.5" fill="rgba(255,210,70,.75)"/>
-          <text x="50" y="424" fill="rgba(255,210,70,.6)" font-size="6.5" font-family="Inter,sans-serif" font-weight="600" text-anchor="middle">CHICANES FORD</text>
-
-          <!-- ═══ VOITURE ANIMÉE ═══ -->
-          <circle r="5" fill="#E8622A" opacity="0.95">
-            <animateMotion dur="9s" repeatCount="indefinite" rotate="auto">
-              <mpath href="#lm-circuit"/>
-            </animateMotion>
-          </circle>
-          <circle r="9" fill="rgba(232,98,42,0.18)">
-            <animateMotion dur="9s" repeatCount="indefinite" rotate="auto">
-              <mpath href="#lm-circuit"/>
-            </animateMotion>
-          </circle>
+          <!-- ═══ VOITURE ANIMÉE (anime.js motion path) ═══ -->
+          <g class="car" style="transform-box: fill-box; transform-origin: center;">
+            <ellipse cx="0" cy="0" rx="10" ry="6" fill="rgba(232,98,42,0.18)"/>
+            <rect x="-7" y="-3" width="14" height="6" rx="2.5" fill="#E8622A"/>
+            <rect x="-3.2" y="-4.6" width="7" height="3.4" rx="1.4" fill="#1a1a1a"/>
+            <circle cx="-4.2" cy="3" r="1.7" fill="#0a0a0a"/>
+            <circle cx="4.2" cy="3" r="1.7" fill="#0a0a0a"/>
+          </g>
 
         </svg>
         <p style="text-align:center;font-size:.625rem;color:rgba(255,255,255,.2);margin-top:.75rem;letter-spacing:.08em;text-transform:uppercase">Circuit de la Sarthe · 13,626 km · Tracé officiel</p>
@@ -965,6 +940,27 @@
         sections.forEach(s => s.classList.toggle('hidden', s.id !== id));
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
+    });
+  </script>
+
+  <!-- ── CIRCUIT MOTION PATH (anime.js) ── -->
+  <script type="module">
+    import { animate, svg } from './js/vendor/anime.esm.js';
+
+    // La voiture .car suit le tracé du Circuit de la Sarthe (#lm-circuit)
+    animate('.car', {
+      ease: 'linear',
+      duration: 9000,
+      loop: true,
+      ...svg.createMotionPath('#lm-circuit')
+    });
+
+    // Le tracé blanc se dessine EXACTEMENT à la vitesse de la voiture (même path, même durée, même ease)
+    animate(svg.createDrawable('#lm-circuit'), {
+      draw: '0 1',
+      ease: 'linear',
+      duration: 9000,
+      loop: true,
     });
   </script>
 

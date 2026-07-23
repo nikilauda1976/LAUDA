@@ -1,19 +1,30 @@
 /* ═══════════════════════════════════════════════
-   DESIGN TOKENS — Apple Neo
+   DESIGN TOKENS — Porsche Design System
    ═══════════════════════════════════════════════ */
 :root {
-  /* Backgrounds */
-  --bg-deep:     #050510;
-  --bg-dark:     #08080f;
-  --bg-surface:  #0f0f1a;
-  --bg-elevated: #13131f;
+  /* Porsche Primary Colors */
+  --color-black:     #1a1a1a;
+  --color-white:     #ffffff;
+  --color-charcoal:  #4a4a4a;
 
-  /* Glass */
-  --glass-bg:        rgba(255, 255, 255, 0.035);
-  --glass-bg-hover:  rgba(255, 255, 255, 0.065);
-  --glass-border:    rgba(255, 255, 255, 0.08);
-  --glass-border-hi: rgba(255, 255, 255, 0.15);
-  --glass-blur:      24px;
+  /* Porsche Accent Colors */
+  --color-carmine:   #D63447;  /* Red accent */
+  --color-sky-blue:  #87CEEB;  /* Modern / Electric */
+  --color-gold:      #D4AF37;  /* Luxury / Premium */
+  --color-cream:     #F5E6D3;  /* Light elements */
+
+  /* Backgrounds — Porsche palette */
+  --bg-deep:     #1a1a1a;      /* Porsche black */
+  --bg-dark:     #262626;      /* Slightly lighter black */
+  --bg-surface:  #2a2a2a;      /* Surface level */
+  --bg-elevated: #333333;      /* Elevated surfaces */
+
+  /* Glass effect — Refined */
+  --glass-bg:        rgba(255, 255, 255, 0.08);
+  --glass-bg-hover:  rgba(255, 255, 255, 0.12);
+  --glass-border:    rgba(255, 255, 255, 0.15);
+  --glass-border-hi: rgba(255, 255, 255, 0.20);
+  --glass-blur:      20px;
 
   /* Spacing scale (8pt rhythm) */
   --space-1: 4px;
@@ -28,9 +39,9 @@
 
   /* Typography */
   --font-sans:     'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-  --text-primary:  #f5f5f7;
-  --text-secondary: rgba(245, 245, 247, 0.60);
-  --text-muted:    rgba(245, 245, 247, 0.42);  /* ≥3:1 contrast on bg-deep */
+  --text-primary:  #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.70);
+  --text-muted:    rgba(255, 255, 255, 0.50);
 
   /* Easing */
   --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -85,7 +96,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--section-pad-x);
-  background: rgba(5, 5, 16, 0.72);
+  background: rgba(26, 26, 26, 0.72);
   backdrop-filter: blur(var(--glass-blur)) saturate(180%);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
   border-bottom: 1px solid var(--glass-border);
@@ -107,8 +118,8 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6e8efb, #a777e3);
-  box-shadow: 0 0 10px rgba(110, 142, 251, 0.7);
+  background: linear-gradient(135deg, #D4AF37, #D63447);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
   flex-shrink: 0;
 }
 
@@ -168,8 +179,8 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
   position: relative;
   overflow: hidden;
   background: radial-gradient(ellipse 90% 70% at 50% 40%,
-    #0d0d2b 0%,
-    #080812 45%,
+    #262626 0%,
+    #1f1f1f 45%,
     var(--bg-deep) 100%
   );
 }
@@ -183,15 +194,15 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
   pointer-events: none;
 }
 
-/* Ambient radial glow */
+/* Ambient radial glow — Porsche gold */
 .hero-bg-glow {
   position: absolute;
   width: 60vmax;
   height: 60vmax;
   border-radius: 50%;
   background: radial-gradient(circle,
-    rgba(110, 142, 251, 0.08) 0%,
-    rgba(167, 119, 227, 0.05) 40%,
+    rgba(212, 175, 55, 0.08) 0%,
+    rgba(214, 52, 71, 0.05) 40%,
     transparent 70%
   );
   pointer-events: none;
@@ -230,9 +241,9 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
   background: linear-gradient(
     160deg,
     #ffffff 0%,
-    rgba(255,255,255,0.9) 30%,
-    rgba(200,210,255,0.7) 70%,
-    rgba(150,170,255,0.4) 100%
+    rgba(255,255,255,0.95) 30%,
+    rgba(212,175,55,0.8) 70%,
+    rgba(214,52,71,0.6) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -260,7 +271,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
   font-size: 3.5rem;
   font-weight: 800;
   letter-spacing: -0.04em;
-  background: linear-gradient(135deg, #6e8efb, #a777e3);
+  background: linear-gradient(135deg, #D4AF37, #D63447);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -411,7 +422,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
    FOOTER
    ═══════════════════════════════════════════════ */
 .footer-glass {
-  background: rgba(5, 5, 16, 0.8);
+  background: rgba(26, 26, 26, 0.8);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border-top: 1px solid var(--glass-border);
@@ -500,7 +511,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1.05;
-  background: linear-gradient(160deg, #ffffff 0%, rgba(210,220,255,0.8) 100%);
+  background: linear-gradient(160deg, #ffffff 0%, rgba(245,230,211,0.85) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

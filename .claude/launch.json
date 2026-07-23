@@ -4,7 +4,7 @@
     {
       "name": "car-showcase",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["/Users/anatolepitron/Downloads/car-showcase/serve.py"],
+      "runtimeArgs": ["-m", "http.server", "8742", "--directory", "/Users/anatolepitron/Downloads/Claude code et idée/car-showcase", "--bind", "127.0.0.1"],
       "port": 8742
     }
   ]
